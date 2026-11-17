@@ -1,27 +1,30 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
-import { colors, spacing, typography } from '../../../../config/theme';
+import { layout, spacing } from '../../../../config/theme';
+import { MessageBubble, PaperBackground, TitleBanner } from '../../../../shared/components/vintage';
 
 // Placeholder TEMPORAL hasta que exista screens/GlossaryScreen.
 export default function GlossaryPlaceholder() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Aquí estará el glosario de vocabulario.</Text>
-    </View>
+    <PaperBackground>
+      <ScrollView contentContainerStyle={styles.content}>
+        <TitleBanner title="Word Notebook" sunburst />
+        <MessageBubble style={styles.bubble}>
+          Your words will appear here with their definition, pronunciation and examples.
+        </MessageBubble>
+      </ScrollView>
+    </PaperBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  content: {
     padding: spacing.md,
-    backgroundColor: colors.background,
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignSelf: 'center',
   },
-  text: {
-    fontSize: typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
+  bubble: {
+    marginTop: spacing.lg,
   },
 });

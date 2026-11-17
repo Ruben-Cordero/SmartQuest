@@ -1,58 +1,61 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
-import { colors, layout, radius, spacing, typography } from '../../config/theme';
+import { colors, fonts, layout, spacing, typography } from '../../config/theme';
+import { InkCard, PaperBackground, TitleBanner } from '../../shared/components/vintage';
 import { useAuth } from '../../shared/context/AuthContext';
 
 export default function TeacherHomeScreen() {
   const { usuario } = useAuth();
-  const nombre = usuario?.nombreCompleto || 'docente';
+  const nombre = usuario?.nombreCompleto || 'teacher';
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.greeting} accessibilityRole="header">
-        ¡Hola, {nombre}!
-      </Text>
-      <Text style={styles.text}>Revisa el avance de tus estudiantes en inglés.</Text>
+    <PaperBackground>
+      <ScrollView contentContainerStyle={styles.content}>
+        <TitleBanner title="Dashboard" sunburst />
 
-      {/* Placeholder: se implementa en src/features/teacher-dashboard */}
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderTitle}>Panel de seguimiento</Text>
-        <Text style={styles.text}>Muy pronto verás aquí el progreso de tus cursos.</Text>
-      </View>
-    </ScrollView>
+        <Text style={styles.greeting}>Hi, {nombre}!</Text>
+        <Text style={styles.text}>Check how your students are doing in English.</Text>
+
+        {/* Placeholder: se implementa en src/features/teacher-dashboard */}
+        <InkCard style={styles.card}>
+          <Text style={styles.cardTitle}>Progress tracking</Text>
+          <Text style={styles.text}>The progress of your classes will appear here soon.</Text>
+        </InkCard>
+      </ScrollView>
+    </PaperBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   content: {
     padding: spacing.md,
+    paddingBottom: spacing.xl,
     width: '100%',
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
   greeting: {
-    fontSize: typography.title,
-    fontWeight: typography.weightBold,
-    color: colors.text,
+    marginTop: spacing.lg,
+    fontFamily: fonts.bodyBold,
+    fontSize: typography.subtitle,
+    lineHeight: typography.subtitle * 1.3,
+    color: colors.tinta,
   },
   text: {
+    fontFamily: fonts.body,
     fontSize: typography.body,
-    color: colors.textMuted,
+    lineHeight: typography.body * 1.4,
+    color: colors.sepia,
     marginTop: spacing.xs,
   },
-  placeholder: {
+  card: {
     marginTop: spacing.lg,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
   },
-  placeholderTitle: {
-    fontSize: typography.subtitle,
-    fontWeight: typography.weightBold,
-    color: colors.text,
+  cardTitle: {
+    fontFamily: fonts.game,
+    fontSize: typography.label,
+    lineHeight: typography.label * 1.3,
+    color: colors.tinta,
+    letterSpacing: 0.5,
   },
 });

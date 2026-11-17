@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ROL_LABELS, ROLES } from '../../config/roles';
-import { colors, layout, radius, spacing, typography } from '../../config/theme';
-import Button from '../../shared/components/Button';
+import { colors, fonts, layout, spacing, typography } from '../../config/theme';
+import { Button3D, InkCard, PaperBackground, TitleBanner } from '../../shared/components/vintage';
 import { useAuth } from '../../shared/context/AuthContext';
 
-const SIN_DATOS = 'Sin datos';
+const SIN_DATOS = 'No data';
 
 function valorOSinDatos(valor) {
   return typeof valor === 'string' && valor.trim() !== '' ? valor : SIN_DATOS;
@@ -40,70 +40,71 @@ export default function ProfileScreen() {
     : [];
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <View style={styles.card}>
-        <Fila etiqueta="Nombre completo">{valorOSinDatos(usuario?.nombreCompleto)}</Fila>
-        <Fila etiqueta="Usuario">{valorOSinDatos(usuario?.username)}</Fila>
-        <Fila etiqueta="Rol">{valorOSinDatos(ROL_LABELS[rol])}</Fila>
-        <Fila etiqueta="Colegio">{valorOSinDatos(usuario?.colegio?.nombre)}</Fila>
+    <PaperBackground>
+      <ScrollView contentContainerStyle={styles.content}>
+        <TitleBanner title={valorOSinDatos(usuario?.nombreCompleto)} sunburst />
 
-        {rol === ROLES.ESTUDIANTE && (
-          <Fila etiqueta="Curso">{valorOSinDatos(usuario?.curso?.nombre)}</Fila>
-        )}
+        <InkCard style={styles.card}>
+          <Fila etiqueta="Full name">{valorOSinDatos(usuario?.nombreCompleto)}</Fila>
+          <Fila etiqueta="Username">{valorOSinDatos(usuario?.username)}</Fila>
+          <Fila etiqueta="Role">{valorOSinDatos(ROL_LABELS[rol])}</Fila>
+          <Fila etiqueta="School">{valorOSinDatos(usuario?.colegio?.nombre)}</Fila>
 
-        {rol === ROLES.DOCENTE && (
-          <Fila etiqueta="Cursos">
-            {cursos.length > 0 ? (
-              cursos.map((nombre, indice) => (
-                <Text key={`${indice}-${nombre}`} style={styles.value}>
-                  • {nombre}
-                </Text>
-              ))
-            ) : (
-              <Text style={styles.value}>{SIN_DATOS}</Text>
-            )}
-          </Fila>
-        )}
-      </View>
+          {rol === ROLES.ESTUDIANTE && (
+            <Fila etiqueta="Class">{valorOSinDatos(usuario?.curso?.nombre)}</Fila>
+          )}
 
-      <Button
-        title="Cerrar sesión"
-        variant="danger"
-        onPress={cerrarSesion}
-        loading={cerrando}
-        style={styles.logout}
-      />
-    </ScrollView>
+          {rol === ROLES.DOCENTE && (
+            <Fila etiqueta="Classes">
+              {cursos.length > 0 ? (
+                cursos.map((nombre, indice) => (
+                  <Text key={`${indice}-${nombre}`} style={styles.value}>
+                    • {nombre}
+                  </Text>
+                ))
+              ) : (
+                <Text style={styles.value}>{SIN_DATOS}</Text>
+              )}
+            </Fila>
+          )}
+        </InkCard>
+
+        <Button3D
+          title="Log out"
+          variant="danger"
+          onPress={cerrarSesion}
+          loading={cerrando}
+          style={styles.logout}
+        />
+      </ScrollView>
+    </PaperBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   content: {
     padding: spacing.md,
+    paddingBottom: spacing.xl,
     width: '100%',
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
   card: {
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    marginTop: spacing.lg,
   },
   row: {
     paddingVertical: spacing.sm,
   },
   label: {
+    fontFamily: fonts.detail,
     fontSize: typography.body,
-    color: colors.textMuted,
+    color: colors.sepia,
   },
   value: {
+    fontFamily: fonts.bodyBold,
     fontSize: typography.body,
-    fontWeight: typography.weightBold,
-    color: colors.text,
+    lineHeight: typography.body * 1.4,
+    color: colors.tinta,
     marginTop: spacing.xs,
   },
   logout: {

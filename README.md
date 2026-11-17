@@ -32,6 +32,11 @@ Tiene dos roles: **estudiante** y **docente**. El docente cuenta con un panel pa
 | JavaScript | — | Lo exige el ERS; por eso no se usa TypeScript. |
 | npm | — | Un solo gestor de paquetes evita diferencias de versiones. |
 | React Navigation | `@react-navigation/native ^7.5.1`, `@react-navigation/native-stack ^7.21.0` | Es la navegación elegida para el proyecto, en lugar de expo-router. |
+| Bottom Tabs | `@react-navigation/bottom-tabs ^7.22.0` | Barra de navegación inferior de la app autenticada. |
+| Íconos | `@expo/vector-icons ^15.0.2` | Íconos de la barra inferior y de las pantallas (Ionicons). |
+| Fuentes | `expo-font ~58.0.12` y `@expo-google-fonts/` ultra, luckiest-guy, nunito y special-elite | Tipografías del estilo vintage. |
+| Splash | `expo-splash-screen ~58.0.14` | Mantiene el splash visible hasta que cargan las fuentes. |
+| Gráficos | `expo-linear-gradient ~58.0.4` y `react-native-svg 15.16.0` | Viñeta del papel, rayos de sol y cintas. |
 | axios | `^1.21.0` | Centraliza las llamadas a la API. |
 | AsyncStorage | `@react-native-async-storage/async-storage 2.2.0` | Guarda en el celular datos locales que no son sensibles. |
 | expo-secure-store | `~58.0.2` | Guarda de forma cifrada datos sensibles, como el token de sesión. |
@@ -117,7 +122,7 @@ Mientras `USE_MOCK = true` en `src/config/apiConfig.js`, el login no llama a la 
 | Estudiante | `alumno1` | `Estudiante123!` | Sofía Valenzuela (4to de Secundaria A) |
 | Docente | `profesor1` | `Docente123!` | Prof. Carlos Mendoza (4to A y 4to B) |
 
-En modo mock, el login también muestra los botones **Entrar como estudiante** y **Entrar como docente**. Para usar la API real, cambia `USE_MOCK` a `false` y pon la URL en `API_BASE_URL`.
+En modo mock, el login también muestra los botones **Enter as student** y **Enter as teacher**. Para usar la API real, cambia `USE_MOCK` a `false` y pon la URL en `API_BASE_URL`.
 
 ## 5. Solución de problemas comunes
 
@@ -140,33 +145,40 @@ El punto de entrada es `index.js`, que carga `App.js`, y este renderiza `src/app
 ```text
 src/
 ├── app/                         # Componente raíz y pantallas generales
-│   ├── App.jsx                  # AuthProvider + elige AuthNavigator o AppNavigator según la sesión
+│   ├── App.jsx                  # Carga las fuentes con el splash visible y luego monta AppContent
+│   ├── AppContent.jsx           # AuthProvider + elige AuthNavigator o AppNavigator según la sesión
+│   ├── fonts.js                 # Archivos de fuente por familia (para useFonts)
 │   └── screens/
 │       ├── LoginScreen.jsx      # Inicio de sesión (con acceso rápido en modo mock)
-│       ├── StudentHomeScreen.jsx # Inicio del estudiante
-│       ├── TeacherHomeScreen.jsx # Inicio del docente
-│       └── ProfileScreen.jsx    # Perfil del usuario y botón "Cerrar sesión"
+│       ├── TeacherHomeScreen.jsx # Panel del docente (pestaña "Panel")
+│       └── ProfileScreen.jsx    # Perfil del usuario y botón "Log out"
 ├── config/                      # Configuración compartida
 │   ├── apiConfig.js             # URL base de la API, USE_MOCK y timeout
 │   ├── roles.js                 # ROLES y ROL_LABELS
-│   └── theme.js                 # Colores, tipografía, espaciados y medidas
+│   └── theme.js                 # Tema vintage: paleta, fuentes, tipografía, espaciados y medidas
 ├── navigation/                  # Navegadores de la app
-│   ├── AppNavigator.jsx         # Con sesión: elige StudentNavigator o TeacherNavigator según el rol
+│   ├── AppNavigator.jsx         # Con sesión: valida el rol y monta MainTabNavigator
 │   ├── AuthNavigator.jsx        # Sin sesión: pantalla de login
-│   ├── StudentNavigator.jsx     # Stack exclusivo del estudiante
-│   ├── TeacherNavigator.jsx     # Stack exclusivo del docente
+│   ├── MainTabNavigator.jsx     # Barra inferior. Estudiante: Learn · Glossary · Profile. Docente: Dashboard · Profile
+│   ├── tabRoutes.js             # Nombres de las pestañas (MAIN_TABS)
 │   └── screenOptions.js         # Estilo común del header
 ├── features/                    # Funcionalidades de la app (cada una con screens/, components/ y services/)
-│   ├── lessons/                 # Unidades y lecciones de inglés (stack propio: EnglishNavigator)
+│   ├── lessons/                 # Unidades y lecciones de inglés
+│   │   ├── data/                # Datos locales (lessons.mock.js hasta que llegue lessons.js)
+│   │   ├── navigation/          # EnglishNavigator (temas → lección), routes.js y placeholders/
+│   │   ├── screens/             # EnglishTopicsScreen
+│   │   ├── services/            # lessons.js: getUnits()
+│   │   └── index.js             # Exporta EnglishNavigator, ENGLISH_ROUTES y GlossaryScreen
 │   ├── quiz/                    # Cuestionarios
 │   ├── vocabulary/              # Glosario: palabra, definición, pronunciación, tiempo verbal, audio y ejemplo
 │   ├── progress/                # Progreso del estudiante
 │   └── teacher-dashboard/       # Panel del docente
 └── shared/                      # Código común a varias funcionalidades
     ├── components/              # Componentes UI reutilizables
-    │   ├── Button.jsx           # Botón con estados normal, deshabilitado y cargando
+    │   ├── Button.jsx           # Alias de Button3D (compatibilidad)
     │   ├── LoadingView.jsx      # Pantalla de carga
-    │   └── ProfileHeaderButton.jsx # Botón "Perfil" del header
+    │   └── vintage/             # Estética años 30: PaperBackground, InkCard, Button3D, TitleBanner,
+    │                            # Ribbon, MessageBubble, HardShadow y useReduceMotion (index.js)
     ├── context/
     │   └── AuthContext.jsx      # AuthProvider y useAuth(): usuario, token, rol, login, logout...
     └── services/
@@ -174,11 +186,25 @@ src/
         └── authService.js       # login, getMe y logout (mock o API real)
 ```
 
+### Idioma de la app
+
+- **Todo el texto que ve el usuario va en inglés** (botones, títulos, pestañas, mensajes de error y etiquetas de accesibilidad): es una app para aprender inglés.
+- Los comentarios del código y la documentación del equipo siguen en español.
+
+### Estilo visual (vintage años 30)
+
+- Todo sale de `src/config/theme.js`. No escribas colores, fuentes ni tamaños a mano.
+- Fuentes: `fonts.display` (Ultra) para títulos grandes, `fonts.game` (Luckiest Guy) para botones, pestañas y etiquetas cortas, `fonts.body`/`fonts.bodyBold` (Nunito) para **todo** el texto de lectura (mínimo 16) y `fonts.detail` (Special Elite) para notas pequeñas.
+- El rojo (`colors.rojo`) es **solo** para errores, respuestas incorrectas o cancelar. El verde (`colors.verde`) solo para aciertos.
+- Con fuentes personalizadas no uses `fontWeight`: usa la familia correspondiente (por ejemplo `fonts.bodyBold`).
+- Usa los componentes de `src/shared/components/vintage`. Las animaciones deben respetar "reducir movimiento" (`useReduceMotion`).
+- No se agregan mascotas, personajes, rachas, insignias, vidas, monedas ni temporizadores.
+
 ### Sesión y roles
 
 - `useAuth()` expone `usuario`, `token`, `rol`, `estaAutenticado`, `cargando`, `login(username, password)` y `logout()`.
 - El token se guarda cifrado con `expo-secure-store`. La contraseña nunca se guarda.
-- Si el usuario tiene un rol que no es `ESTUDIANTE` ni `DOCENTE`, se cierra la sesión y el login muestra "Rol no reconocido".
+- Si el usuario tiene un rol que no es `ESTUDIANTE` ni `DOCENTE`, se cierra la sesión y el login muestra "Unrecognized role".
 
 Cada funcionalidad tiene la misma organización:
 

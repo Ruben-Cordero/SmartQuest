@@ -4,6 +4,6 @@ export const ROLES = {
 };
 
 export const ROL_LABELS = {
-  ESTUDIANTE: 'Estudiante',
-  DOCENTE: 'Docente',
+  ESTUDIANTE: 'Student',
+  DOCENTE: 'Teacher',
 };

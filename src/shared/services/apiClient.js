@@ -19,18 +19,15 @@ export function setAuthToken(token) {
 }
 
 // Convierte un error de axios en un mensaje comprensible para el usuario.
-export function getErrorMessage(
-  error,
-  fallback = 'Ocurrió un error inesperado. Intenta de nuevo.',
-) {
+export function getErrorMessage(error, fallback = 'Something went wrong. Please try again.') {
   if (error?.code === 'ECONNABORTED') {
-    return 'El servidor tardó demasiado en responder. Intenta de nuevo.';
+    return 'The server took too long to respond. Please try again.';
   }
   if (error?.response) {
     return error.response.data?.message || fallback;
   }
   if (error?.request) {
-    return 'No se pudo conectar con el servidor. Revisa tu conexión a internet.';
+    return 'Could not reach the server. Check your internet connection.';
   }
   return error?.message || fallback;
 }

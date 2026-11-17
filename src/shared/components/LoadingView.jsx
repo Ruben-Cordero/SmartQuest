@@ -1,29 +1,38 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 
-import { colors, spacing, typography } from '../../config/theme';
+import { colors, fonts, spacing, typography } from '../../config/theme';
+import PaperBackground from './vintage/PaperBackground';
 
 // Pantalla completa de carga con un mensaje opcional.
-export default function LoadingView({ message = 'Cargando...' }) {
+export default function LoadingView({ message = 'Loading...' }) {
   return (
-    <View style={styles.container} accessibilityRole="progressbar" accessibilityLabel={message}>
-      <ActivityIndicator size="large" color={colors.primary} />
+    <PaperBackground
+      edges={['top', 'bottom', 'left', 'right']}
+      inkTop={false}
+      style={styles.container}
+    >
+      <ActivityIndicator
+        size="large"
+        color={colors.azul}
+        accessibilityRole="progressbar"
+        accessibilityLabel={message}
+      />
       {message ? <Text style={styles.text}>{message}</Text> : null}
-    </View>
+    </PaperBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
-    backgroundColor: colors.background,
   },
   text: {
     marginTop: spacing.md,
+    fontFamily: fonts.body,
     fontSize: typography.body,
-    color: colors.textMuted,
+    color: colors.sepia,
     textAlign: 'center',
   },
 });

@@ -6,7 +6,7 @@ import apiClient, { getErrorMessage, setAuthToken } from './apiClient';
 // Solo se guarda el token. La contraseña nunca se almacena.
 const TOKEN_KEY = 'smartquest_token';
 
-const CREDENCIALES_INCORRECTAS = 'Usuario o contraseña incorrectos';
+const CREDENCIALES_INCORRECTAS = 'Incorrect username or password';
 const MOCK_DELAY_MS = 600;
 
 // ---------------------------------------------------------------------------
@@ -75,7 +75,7 @@ async function mockGetMe(token) {
   await esperar(MOCK_DELAY_MS);
   const sesion = MOCK_SESSIONS.find((s) => s.data.token === token);
   if (!sesion) {
-    throw new Error('Tu sesión expiró. Vuelve a iniciar sesión.');
+    throw new Error('Your session has expired. Please log in again.');
   }
   return copiar(sesion.data.usuario);
 }
@@ -109,7 +109,7 @@ export async function login(username, password) {
   }
 
   if (!data?.token || !data?.usuario) {
-    throw new Error('El servidor respondió con datos incompletos. Intenta de nuevo.');
+    throw new Error('The server sent incomplete data. Please try again.');
   }
 
   await SecureStore.setItemAsync(TOKEN_KEY, data.token);
@@ -124,7 +124,7 @@ export async function login(username, password) {
 export async function getMe() {
   const token = await getStoredToken();
   if (!token) {
-    throw new Error('No hay una sesión activa.');
+    throw new Error('There is no active session.');
   }
 
   if (USE_MOCK) {
@@ -139,12 +139,12 @@ export async function getMe() {
     // Acepta tanto data: { usuario } como data: usuario.
     const usuario = data?.usuario ?? data;
     if (!usuario?.rol) {
-      throw new Error('El servidor respondió con datos incompletos.');
+      throw new Error('The server sent incomplete data.');
     }
     setAuthToken(token);
     return usuario;
   } catch (error) {
-    throw new Error(getErrorMessage(error, 'No se pudo recuperar tu sesión.'));
+    throw new Error(getErrorMessage(error, 'Could not restore your session.'));
   }
 }
 

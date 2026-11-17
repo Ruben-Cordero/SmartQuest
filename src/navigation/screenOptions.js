@@ -1,11 +1,22 @@
-import { colors, typography } from '../config/theme';
+import { colors, fonts, typography } from '../config/theme';
 
-// Estilo común del header para todos los stacks.
-// El botón atrás es el nativo de cada plataforma (flecha en la esquina superior
-// izquierda), que aparece solo en las pantallas que tienen a dónde volver.
+// Cabecera vintage común: fondo azul, título crema en Luckiest Guy y flecha atrás
+// nativa en crema. El borde de tinta bajo la cabecera lo dibuja PaperBackground
+// (inkTop), porque la cabecera nativa no admite bordes propios.
+export const headerOptions = {
+  headerStyle: { backgroundColor: colors.azul },
+  headerTintColor: colors.crema,
+  headerTitleStyle: {
+    color: colors.crema,
+    fontFamily: fonts.game,
+    fontSize: typography.subtitle,
+  },
+  headerBackTitleStyle: { fontFamily: fonts.game },
+  headerShadowVisible: false,
+};
+
+// Opciones para los stacks (native-stack).
 export const defaultScreenOptions = {
-  headerStyle: { backgroundColor: colors.background },
-  headerTintColor: colors.primary,
-  headerTitleStyle: { color: colors.text, fontSize: typography.subtitle },
-  contentStyle: { backgroundColor: colors.background },
+  ...headerOptions,
+  contentStyle: { backgroundColor: colors.papel },
 };

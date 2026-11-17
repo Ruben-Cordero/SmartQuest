@@ -9,11 +9,16 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { USE_MOCK } from '../../config/apiConfig';
-import { colors, layout, radius, spacing, typography } from '../../config/theme';
-import Button from '../../shared/components/Button';
+import { colors, fonts, layout, radius, spacing, typography } from '../../config/theme';
+import {
+  Button3D,
+  InkCard,
+  MessageBubble,
+  PaperBackground,
+  TitleBanner,
+} from '../../shared/components/vintage';
 import { useAuth } from '../../shared/context/AuthContext';
 import { MOCK_ACCOUNTS } from '../../shared/services/authService';
 
@@ -30,7 +35,7 @@ export default function LoginScreen() {
   async function ingresar(usuarioIngresado, passwordIngresada) {
     if (enviando) return;
     if (!usuarioIngresado.trim() || !passwordIngresada) {
-      setError('Ingresa tu usuario y tu contraseña.');
+      setError('Enter your username and password.');
       return;
     }
     setError('');
@@ -39,15 +44,15 @@ export default function LoginScreen() {
       await login(usuarioIngresado.trim(), passwordIngresada);
       // Con login exitoso, App.jsx reemplaza esta pantalla por la app.
     } catch (e) {
-      setError(e?.message || 'No se pudo iniciar sesión. Intenta de nuevo.');
+      setError(e?.message || 'Could not log in. Please try again.');
       setEnviando(false);
     }
   }
 
-  const mensaje = error || aviso;
+  const mensajeError = error || aviso;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <PaperBackground edges={['top', 'bottom', 'left', 'right']} inkTop={false}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -56,93 +61,90 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.card}>
-            <Text style={styles.title} accessibilityRole="header">
-              SmartQuest
-            </Text>
-            <Text style={styles.subtitle}>Inicia sesión para practicar inglés</Text>
+          <View style={styles.column}>
+            <TitleBanner title="SmartQuest" sunburst />
 
-            <Text style={styles.label} nativeID="labelUsuario">
-              Usuario
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={username}
-              onChangeText={setUsername}
-              placeholder="Tu usuario"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="username"
-              textContentType="username"
-              returnKeyType="next"
-              editable={!enviando}
-              accessibilityLabelledBy="labelUsuario"
-              accessibilityLabel="Usuario"
-            />
+            <MessageBubble style={styles.greeting}>Hi, explorer! Log in to take off.</MessageBubble>
 
-            <Text style={styles.label} nativeID="labelPassword">
-              Contraseña
-            </Text>
-            <View style={styles.passwordRow}>
+            <InkCard style={styles.form}>
+              <Text style={styles.label} nativeID="labelUsuario">
+                Username
+              </Text>
               <TextInput
-                style={[styles.input, styles.passwordInput]}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Tu contraseña"
-                placeholderTextColor={colors.textMuted}
-                secureTextEntry={!mostrarPassword}
+                style={styles.input}
+                value={username}
+                onChangeText={setUsername}
+                placeholder="Your username"
+                placeholderTextColor={colors.sepia}
                 autoCapitalize="none"
                 autoCorrect={false}
-                autoComplete="password"
-                textContentType="password"
-                returnKeyType="go"
-                onSubmitEditing={() => ingresar(username, password)}
+                autoComplete="username"
+                textContentType="username"
+                returnKeyType="next"
                 editable={!enviando}
-                accessibilityLabelledBy="labelPassword"
-                accessibilityLabel="Contraseña"
+                accessibilityLabelledBy="labelUsuario"
+                accessibilityLabel="Username"
               />
-              <Pressable
-                onPress={() => setMostrarPassword((valor) => !valor)}
-                accessibilityRole="button"
-                accessibilityLabel={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                style={styles.toggle}
-              >
-                <Text style={styles.toggleText}>{mostrarPassword ? 'Ocultar' : 'Mostrar'}</Text>
-              </Pressable>
-            </View>
 
-            {mensaje ? (
-              <View
-                style={styles.errorBox}
-                accessibilityRole="alert"
-                accessibilityLiveRegion="polite"
-              >
-                <Text style={styles.errorText}>{mensaje}</Text>
+              <Text style={styles.label} nativeID="labelPassword">
+                Password
+              </Text>
+              <View style={styles.passwordRow}>
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Your password"
+                  placeholderTextColor={colors.sepia}
+                  secureTextEntry={!mostrarPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="password"
+                  textContentType="password"
+                  returnKeyType="go"
+                  onSubmitEditing={() => ingresar(username, password)}
+                  editable={!enviando}
+                  accessibilityLabelledBy="labelPassword"
+                  accessibilityLabel="Password"
+                />
+                <Pressable
+                  onPress={() => setMostrarPassword((valor) => !valor)}
+                  accessibilityRole="button"
+                  accessibilityLabel={mostrarPassword ? 'Hide password' : 'Show password'}
+                  style={styles.toggle}
+                >
+                  <Text style={styles.toggleText}>{mostrarPassword ? 'Hide' : 'Show'}</Text>
+                </Pressable>
               </View>
-            ) : null}
 
-            <Button
-              title="Ingresar"
-              onPress={() => ingresar(username, password)}
-              disabled={!camposCompletos}
-              loading={enviando}
-              style={styles.submit}
-            />
+              {mensajeError ? (
+                <MessageBubble tone="error" style={styles.error}>
+                  {mensajeError}
+                </MessageBubble>
+              ) : null}
+
+              <Button3D
+                title="Log in"
+                onPress={() => ingresar(username, password)}
+                disabled={!camposCompletos}
+                loading={enviando}
+                style={styles.submit}
+              />
+            </InkCard>
 
             {USE_MOCK && (
               <View style={styles.mockSection}>
-                <Text style={styles.mockTitle}>Acceso rápido (modo de prueba)</Text>
-                <Button
-                  title="Entrar como estudiante"
+                <Text style={styles.mockTitle}>Quick access (test mode)</Text>
+                <Button3D
+                  title="Enter as student"
                   variant="secondary"
                   disabled={enviando}
                   onPress={() =>
                     ingresar(MOCK_ACCOUNTS.ESTUDIANTE.username, MOCK_ACCOUNTS.ESTUDIANTE.password)
                   }
                 />
-                <Button
-                  title="Entrar como docente"
+                <Button3D
+                  title="Enter as teacher"
                   variant="secondary"
                   disabled={enviando}
                   style={styles.mockButton}
@@ -155,15 +157,11 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </PaperBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   flex: {
     flex: 1,
   },
@@ -172,40 +170,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.md,
   },
-  card: {
+  column: {
     width: '100%',
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
-  title: {
-    fontSize: typography.title,
-    fontWeight: typography.weightBold,
-    color: colors.primary,
-    textAlign: 'center',
+  greeting: {
+    marginTop: spacing.lg,
   },
-  subtitle: {
-    fontSize: typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginTop: spacing.xs,
-    marginBottom: spacing.lg,
+  form: {
+    marginTop: spacing.md,
   },
   label: {
+    fontFamily: fonts.game,
     fontSize: typography.body,
-    fontWeight: typography.weightBold,
-    color: colors.text,
+    lineHeight: typography.body * 1.3,
+    color: colors.tinta,
+    letterSpacing: 0.5,
     marginBottom: spacing.xs,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   input: {
     minHeight: layout.minTouchSize,
-    borderWidth: layout.borderWidth,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
+    borderWidth: layout.inkBorder,
+    borderColor: colors.tinta,
+    borderRadius: radius.ink,
     paddingHorizontal: spacing.md,
+    fontFamily: fonts.body,
     fontSize: typography.body,
-    color: colors.text,
-    backgroundColor: colors.background,
+    color: colors.tinta,
+    backgroundColor: colors.papel,
   },
   passwordRow: {
     flexDirection: 'row',
@@ -221,19 +215,13 @@ const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   toggleText: {
+    fontFamily: fonts.game,
     fontSize: typography.body,
-    fontWeight: typography.weightBold,
-    color: colors.primary,
+    color: colors.tinta,
+    textDecorationLine: 'underline',
   },
-  errorBox: {
+  error: {
     marginTop: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.sm,
-    backgroundColor: colors.errorBackground,
-  },
-  errorText: {
-    fontSize: typography.body,
-    color: colors.error,
   },
   submit: {
     marginTop: spacing.lg,
@@ -242,8 +230,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   mockTitle: {
+    fontFamily: fonts.detail,
     fontSize: typography.body,
-    color: colors.textMuted,
+    color: colors.sepia,
     textAlign: 'center',
     marginBottom: spacing.sm,
   },

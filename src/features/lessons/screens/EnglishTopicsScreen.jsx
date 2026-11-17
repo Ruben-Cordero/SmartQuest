@@ -1,58 +1,68 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { useMemo } from 'react';
-import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useMemo, useRef } from 'react';
+import { SectionList, StyleSheet, Text, View } from 'react-native';
 
-import { colors, layout, radius, spacing, typography } from '../../../config/theme';
-import Button from '../../../shared/components/Button';
+import { colors, fonts, layout, spacing, typography } from '../../../config/theme';
+import {
+  Button3D,
+  InkCard,
+  MessageBubble,
+  PaperBackground,
+  Ribbon,
+  TitleBanner,
+  useReduceMotion,
+} from '../../../shared/components/vintage';
 import { ENGLISH_ROUTES } from '../navigation/routes';
 import { getUnits } from '../services/lessons';
 
-// Lista de temas (unidades y lecciones) del módulo de Inglés.
-// - Arriba: la barra de estado y el notch los cubre el header del stack
-//   (si la pantalla se muestra sin header, agrega 'top' a SAFE_AREA_EDGES).
-// - Abajo: la lista se desplaza por debajo de la barra de gestos y el
-//   paddingBottom suma esa zona segura para que la última lección quede visible.
-const SAFE_AREA_EDGES = ['left', 'right'];
+// Lista de mundos (unidades) y niveles (lecciones) del módulo de Inglés.
+// La cabecera del stack cubre la barra de estado y la barra de pestañas cubre
+// la zona segura inferior; PaperBackground respeta los laterales.
 const LESSON_TITLE_MAX_LINES = 2;
 
-function ListHeader({ onOpenGlossary }) {
+// Encabezado con un botón por mundo para saltar directo a sus niveles.
+function ListHeader({ worlds, onSelectWorld }) {
   return (
     <View style={styles.header}>
-      <View style={styles.headerText}>
-        <Text style={styles.title} accessibilityRole="header">
-          Inglés
-        </Text>
-        <Text style={styles.subtitle}>Unidades y lecciones</Text>
-      </View>
-      <Button
-        title="Glosario"
-        variant="secondary"
-        onPress={onOpenGlossary}
-        accessibilityLabel="Abrir glosario"
-        style={styles.glossaryButton}
-      />
+      <TitleBanner title="Learn" sunburst />
+      <Text style={styles.subtitle}>Pick a world and enter a level.</Text>
+      {worlds.length > 0 && (
+        <View style={styles.worldPicker}>
+          {worlds.map((world) => (
+            <Button3D
+              key={world.id}
+              title={`World ${world.number}`}
+              variant="secondary"
+              onPress={() => onSelectWorld(world.number - 1)}
+              accessibilityLabel={`Go to world ${world.number}: ${world.title}`}
+              style={styles.worldButton}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 }
 
 function EmptyList() {
   return (
-    <View style={styles.empty}>
-      <Text style={styles.emptyText}>
-        Todavía no hay unidades disponibles. Vuelve pronto para empezar a practicar.
-      </Text>
-    </View>
+    <MessageBubble style={styles.empty}>
+      There are no worlds available yet. Come back soon to start practicing.
+    </MessageBubble>
   );
 }
 
-function UnitHeader({ title }) {
+// Cinta del mundo: al tocarla, el mundo sube al tope y se ven sus niveles.
+function UnitHeader({ number, title, onPress }) {
   return (
-    <View style={styles.unitHeader}>
-      <Text style={styles.unitTitle} accessibilityRole="header">
-        {title}
-      </Text>
-    </View>
+    <Ribbon
+      text={`WORLD ${number} · ${title}`}
+      onPress={onPress}
+      accessibilityLabel={`World ${number}: ${title}`}
+      accessibilityHint="Shows the levels in this world"
+      style={styles.unitHeader}
+    />
   );
 }
 
@@ -60,33 +70,46 @@ function LessonSeparator() {
   return <View style={styles.lessonSeparator} />;
 }
 
-function LessonRow({ lesson, onPress }) {
+function LessonRow({ lesson, level, onPress }) {
   return (
-    <Pressable
+    <InkCard
       onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Abrir lección ${lesson.title}`}
+      accessibilityLabel={`Level ${level}: ${lesson.title}`}
+      accessibilityHint="Opens the level"
       testID={`lesson-${lesson.id}`}
-      android_ripple={{ color: colors.disabledBackground }}
-      style={({ pressed }) => [styles.lesson, pressed && styles.lessonPressed]}
+      contentStyle={styles.lesson}
     >
-      <Text style={styles.lessonTitle} numberOfLines={LESSON_TITLE_MAX_LINES}>
-        {lesson.title}
-      </Text>
-      <Text style={styles.chevron} importantForAccessibility="no" accessibilityElementsHidden>
-        ›
-      </Text>
-    </Pressable>
+      <View style={styles.lessonText}>
+        <Text style={styles.levelTag}>LEVEL {level}</Text>
+        <Text style={styles.lessonTitle} numberOfLines={LESSON_TITLE_MAX_LINES}>
+          {lesson.title}
+        </Text>
+      </View>
+      <Ionicons
+        name="chevron-forward"
+        size={typography.title}
+        color={colors.tinta}
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+      />
+    </InkCard>
   );
 }
 
 export default function EnglishTopicsScreen() {
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const listRef = useRef(null);
+  const reduceMotion = useReduceMotion();
 
   // Cada unidad es una sección; SectionList espera las filas en "data".
   const sections = useMemo(
-    () => getUnits().map((unit) => ({ id: unit.id, title: unit.title, data: unit.lessons })),
+    () =>
+      getUnits().map((unit, index) => ({
+        id: unit.id,
+        number: index + 1,
+        title: unit.title,
+        data: unit.lessons,
+      })),
     [],
   );
 
@@ -94,124 +117,120 @@ export default function EnglishTopicsScreen() {
     navigation.navigate(ENGLISH_ROUTES.LESSON_DETAIL, { lessonId });
   }
 
-  function handleOpenGlossary() {
-    navigation.navigate(ENGLISH_ROUTES.GLOSSARY);
+  // Lleva la cinta del mundo al tope de la lista (itemIndex 0 = cabecera de la sección).
+  // Sin animación si el usuario activó "reducir movimiento".
+  function goToWorld(sectionIndex) {
+    listRef.current?.scrollToLocation({
+      sectionIndex,
+      itemIndex: 0,
+      viewOffset: 0,
+      animated: reduceMotion === false,
+    });
+  }
+
+  // Si la sección todavía no se midió, se aproxima y se reintenta una vez.
+  function handleScrollToIndexFailed({ index, averageItemLength }) {
+    listRef.current?.getScrollResponder()?.scrollTo({
+      y: index * averageItemLength,
+      animated: false,
+    });
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={SAFE_AREA_EDGES}>
+    <PaperBackground>
       <SectionList
+        ref={listRef}
         style={styles.list}
         sections={sections}
         keyExtractor={(lesson) => lesson.id}
-        ListHeaderComponent={<ListHeader onOpenGlossary={handleOpenGlossary} />}
+        ListHeaderComponent={<ListHeader worlds={sections} onSelectWorld={goToWorld} />}
         ListEmptyComponent={EmptyList}
         ItemSeparatorComponent={LessonSeparator}
         stickySectionHeadersEnabled={false}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.xl }]}
-        renderSectionHeader={({ section }) => <UnitHeader title={section.title} />}
-        renderItem={({ item }) => (
-          <LessonRow lesson={item} onPress={() => handleOpenLesson(item.id)} />
+        onScrollToIndexFailed={handleScrollToIndexFailed}
+        contentContainerStyle={styles.content}
+        renderSectionHeader={({ section }) => (
+          <UnitHeader
+            number={section.number}
+            title={section.title}
+            onPress={() => goToWorld(section.number - 1)}
+          />
+        )}
+        renderItem={({ item, index }) => (
+          <LessonRow lesson={item} level={index + 1} onPress={() => handleOpenLesson(item.id)} />
         )}
       />
-    </SafeAreaView>
+    </PaperBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   list: {
     flex: 1,
   },
-  // Márgenes laterales uniformes de 16 y ancho máximo para pantallas grandes;
+  // Márgenes laterales de 16 y ancho máximo para pantallas grandes;
   // sin anchos ni altos fijos, se adapta desde 360 dp.
   content: {
     flexGrow: 1,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
     width: '100%',
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
-  // Título a la izquierda y botón "Glosario" a la derecha; en pantallas
-  // muy angostas o con texto grande, el botón baja a la siguiente línea.
   header: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: spacing.md,
-    borderBottomWidth: layout.borderWidth,
-    borderBottomColor: colors.disabledBackground,
-  },
-  headerText: {
-    flexGrow: 1,
-    flexShrink: 1,
-    marginRight: spacing.md,
-  },
-  glossaryButton: {
-    marginTop: spacing.sm,
-  },
-  title: {
-    fontSize: typography.title,
-    fontWeight: typography.weightBold,
-    color: colors.text,
-  },
-  subtitle: {
-    fontSize: typography.body,
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
-  // Cabecera de unidad: más grande, en negrita y con más aire arriba que entre lecciones.
-  unitHeader: {
-    paddingTop: spacing.xl,
     paddingBottom: spacing.sm,
   },
-  unitTitle: {
-    fontSize: typography.subtitle,
-    fontWeight: typography.weightBold,
-    color: colors.text,
+  subtitle: {
+    marginTop: spacing.ms,
+    fontFamily: fonts.detail,
+    fontSize: typography.body,
+    color: colors.sepia,
+    textAlign: 'center',
+  },
+  // Botones de mundo: dos por fila en un teléfono de 360; bajan de línea si no caben.
+  worldPicker: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  worldButton: {
+    flexGrow: 1,
+    flexBasis: '40%',
+  },
+  // Cada mundo: cinta con más aire arriba que la separación entre niveles.
+  unitHeader: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.ms,
   },
   lessonSeparator: {
-    height: spacing.sm,
+    height: spacing.ms,
   },
-  // Fila de lección: área táctil de al menos 48 de alto; el texto largo ocupa hasta 2 líneas.
   lesson: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: layout.minTouchSize,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
   },
-  lessonPressed: {
-    backgroundColor: colors.disabledBackground,
+  lessonText: {
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  levelTag: {
+    fontFamily: fonts.game,
+    fontSize: typography.body,
+    lineHeight: typography.body * 1.3,
+    color: colors.sepia,
+    letterSpacing: 0.5,
   },
   lessonTitle: {
-    flex: 1,
-    flexShrink: 1,
-    fontSize: typography.body,
-    color: colors.text,
-  },
-  chevron: {
-    fontSize: typography.title,
-    color: colors.primary,
-    marginLeft: spacing.sm,
+    marginTop: spacing.xs,
+    fontFamily: fonts.bodyBold,
+    fontSize: typography.label,
+    lineHeight: typography.label * 1.35,
+    color: colors.tinta,
   },
   empty: {
     marginTop: spacing.lg,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-  },
-  emptyText: {
-    fontSize: typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
   },
 });
