@@ -1,36 +1,24 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect } from 'react';
 
-import { colors, typography } from '../config/theme';
+import { ROLES } from '../config/roles';
+import LoadingView from '../shared/components/LoadingView';
+import { useAuth } from '../shared/context/AuthContext';
+import MainTabNavigator from './MainTabNavigator';
 
-const Stack = createNativeStackNavigator();
+const ROL_NO_RECONOCIDO = 'Unrecognized role';
 
-// Placeholder: se reemplaza cuando existan las pantallas reales.
-function PlaceholderScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Virtu</Text>
-    </View>
-  );
-}
-
+// Navegador para usuarios con sesión: barra inferior con pestañas según el rol.
 export default function AppNavigator() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="Inicio" component={PlaceholderScreen} />
-    </Stack.Navigator>
-  );
-}
+  const { rol, logout } = useAuth();
+  const rolValido = rol === ROLES.ESTUDIANTE || rol === ROLES.DOCENTE;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: typography.title,
-    color: colors.text,
-  },
-});
+  useEffect(() => {
+    if (!rolValido) {
+      // Cierra la sesión; el login mostrará el mensaje "Unrecognized role".
+      logout(ROL_NO_RECONOCIDO);
+    }
+  }, [rolValido, logout]);
+
+  if (rolValido) return <MainTabNavigator />;
+  return <LoadingView message={ROL_NO_RECONOCIDO} />;
+}

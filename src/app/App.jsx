@@ -1,16 +1,34 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 
-import AppNavigator from '../navigation/AppNavigator';
+import { fallBackToSystemFonts } from '../config/theme';
+import { FONT_SOURCES } from './fonts';
+
+// El splash nativo queda visible hasta que las fuentes estén listas (o fallen).
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
-  return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-      <StatusBar style="auto" />
-    </SafeAreaProvider>
-  );
+  const [fuentesCargadas, errorFuentes] = useFonts(FONT_SOURCES);
+  const listo = fuentesCargadas || Boolean(errorFuentes);
+
+  useEffect(() => {
+    if (listo) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [listo]);
+
+  if (!listo) {
+    return null;
+  }
+
+  if (errorFuentes) {
+    // Sin fuentes personalizadas la app sigue funcionando con las del sistema.
+    fallBackToSystemFonts();
+  }
+
+  // Se carga recién aquí para que todas las pantallas creen sus estilos con las
+  // fuentes ya resueltas (las personalizadas o, si fallaron, las del sistema).
+  const AppContent = require('./AppContent').default;
+  return <AppContent />;
 }

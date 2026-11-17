@@ -1,0 +1,35 @@
+import { create } from 'axios';
+
+import { API_BASE_URL, API_TIMEOUT_MS } from '../../config/apiConfig';
+
+// Cliente central: todas las llamadas a la API pasan por aquí.
+const apiClient = create({
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT_MS,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Agrega (o quita) el token de sesión en todas las peticiones siguientes.
+export function setAuthToken(token) {
+  if (token) {
+    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete apiClient.defaults.headers.common.Authorization;
+  }
+}
+
+// Convierte un error de axios en un mensaje comprensible para el usuario.
+export function getErrorMessage(error, fallback = 'Something went wrong. Please try again.') {
+  if (error?.code === 'ECONNABORTED') {
+    return 'The server took too long to respond. Please try again.';
+  }
+  if (error?.response) {
+    return error.response.data?.message || fallback;
+  }
+  if (error?.request) {
+    return 'Could not reach the server. Check your internet connection.';
+  }
+  return error?.message || fallback;
+}
+
+export default apiClient;
