@@ -18,7 +18,7 @@ export default function StudentHomeScreen() {
 
       {/* Acceso a las unidades: se implementa en src/features/lessons */}
       <Pressable
-        onPress={() => navigation.navigate('EnglishTopics')}
+        onPress={() => navigation.navigate('English')}
         accessibilityRole="button"
         accessibilityLabel="Abrir Unidades de Inglés"
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}

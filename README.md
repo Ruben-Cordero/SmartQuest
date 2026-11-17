@@ -157,7 +157,7 @@ src/
 │   ├── TeacherNavigator.jsx     # Stack exclusivo del docente
 │   └── screenOptions.js         # Estilo común del header
 ├── features/                    # Funcionalidades de la app (cada una con screens/, components/ y services/)
-│   ├── lessons/                 # Unidades y lecciones de inglés
+│   ├── lessons/                 # Unidades y lecciones de inglés (stack propio: EnglishNavigator)
 │   ├── quiz/                    # Cuestionarios
 │   ├── vocabulary/              # Glosario: palabra, definición, pronunciación, tiempo verbal, audio y ejemplo
 │   ├── progress/                # Progreso del estudiante

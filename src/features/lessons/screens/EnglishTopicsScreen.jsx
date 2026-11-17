@@ -1,8 +1,11 @@
+import { useNavigation } from '@react-navigation/native';
 import { useMemo } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, layout, radius, spacing, typography } from '../../../config/theme';
+import Button from '../../../shared/components/Button';
+import { ENGLISH_ROUTES } from '../navigation/routes';
 import { getUnits } from '../services/lessons';
 
 // Lista de temas (unidades y lecciones) del módulo de Inglés.
@@ -13,13 +16,22 @@ import { getUnits } from '../services/lessons';
 const SAFE_AREA_EDGES = ['left', 'right'];
 const LESSON_TITLE_MAX_LINES = 2;
 
-function ListHeader() {
+function ListHeader({ onOpenGlossary }) {
   return (
     <View style={styles.header}>
-      <Text style={styles.title} accessibilityRole="header">
-        Inglés
-      </Text>
-      <Text style={styles.subtitle}>Unidades y lecciones</Text>
+      <View style={styles.headerText}>
+        <Text style={styles.title} accessibilityRole="header">
+          Inglés
+        </Text>
+        <Text style={styles.subtitle}>Unidades y lecciones</Text>
+      </View>
+      <Button
+        title="Glosario"
+        variant="secondary"
+        onPress={onOpenGlossary}
+        accessibilityLabel="Abrir glosario"
+        style={styles.glossaryButton}
+      />
     </View>
   );
 }
@@ -70,6 +82,7 @@ function LessonRow({ lesson, onPress }) {
 
 export default function EnglishTopicsScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   // Cada unidad es una sección; SectionList espera las filas en "data".
   const sections = useMemo(
@@ -78,8 +91,11 @@ export default function EnglishTopicsScreen() {
   );
 
   function handleOpenLesson(lessonId) {
-    // T16: conectar con LessonDetailScreen
-    // navigation.navigate('LessonDetail', { lessonId });
+    navigation.navigate(ENGLISH_ROUTES.LESSON_DETAIL, { lessonId });
+  }
+
+  function handleOpenGlossary() {
+    navigation.navigate(ENGLISH_ROUTES.GLOSSARY);
   }
 
   return (
@@ -88,7 +104,7 @@ export default function EnglishTopicsScreen() {
         style={styles.list}
         sections={sections}
         keyExtractor={(lesson) => lesson.id}
-        ListHeaderComponent={ListHeader}
+        ListHeaderComponent={<ListHeader onOpenGlossary={handleOpenGlossary} />}
         ListEmptyComponent={EmptyList}
         ItemSeparatorComponent={LessonSeparator}
         stickySectionHeadersEnabled={false}
@@ -120,10 +136,24 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
+  // Título a la izquierda y botón "Glosario" a la derecha; en pantallas
+  // muy angostas o con texto grande, el botón baja a la siguiente línea.
   header: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingBottom: spacing.md,
     borderBottomWidth: layout.borderWidth,
     borderBottomColor: colors.disabledBackground,
+  },
+  headerText: {
+    flexGrow: 1,
+    flexShrink: 1,
+    marginRight: spacing.md,
+  },
+  glossaryButton: {
+    marginTop: spacing.sm,
   },
   title: {
     fontSize: typography.title,
