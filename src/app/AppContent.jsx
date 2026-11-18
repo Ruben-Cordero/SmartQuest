@@ -15,7 +15,7 @@ const navigationTheme = {
     ...DefaultTheme.colors,
     primary: colors.azul,
     background: colors.papel,
-    card: colors.azul,
+    card: colors.papel,
     text: colors.tinta,
     border: colors.tinta,
   },
@@ -33,8 +33,8 @@ function RootNavigator() {
 
   return (
     <>
-      {/* Con sesión las cabeceras son azules (texto claro); el login es papel (texto oscuro). */}
-      <StatusBar style={estaAutenticado ? 'light' : 'dark'} />
+      {/* Cabeceras y login son color papel: hora y batería en oscuro. */}
+      <StatusBar style="dark" />
       {estaAutenticado ? <AppNavigator /> : <AuthNavigator />}
     </>
   );

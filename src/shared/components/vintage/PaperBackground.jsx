@@ -12,7 +12,7 @@ const HORIZONTAL = { start: { x: 0, y: 0 }, end: { x: 1, y: 0 } };
  * Fondo de papel envejecido con viñeta suave en los bordes.
  * - edges: bordes de la zona segura a respetar. Por defecto solo los laterales,
  *   porque arriba está la cabecera y abajo la barra de pestañas.
- * - inkTop: línea de tinta arriba (borde inferior de la cabecera azul).
+ * - inkTop: línea de tinta arriba (borde inferior de la cabecera).
  */
 export default function PaperBackground({
   children,

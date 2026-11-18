@@ -113,16 +113,20 @@ Deja esa terminal abierta mientras trabajas. Aparecerá un código QR.
 - Sacude el celular y elige **Reload**.
 - Presiona la tecla `r` en la terminal donde corre el servidor.
 
-### Usuarios de prueba (mock)
+### API y usuarios de prueba
 
-Mientras `USE_MOCK = true` en `src/config/apiConfig.js`, el login no llama a la API y acepta solo estas cuentas:
+La app usa la API central de Virtu: `https://backend-virtu.onrender.com/api` (documentación interactiva en [`/api/docs`](https://backend-virtu.onrender.com/api/docs/)). La configuración está en `src/config/apiConfig.js`:
 
-| Rol | Usuario | Contraseña | Nombre |
-|---|---|---|---|
-| Estudiante | `alumno1` | `Estudiante123!` | Sofía Valenzuela (4to de Secundaria A) |
-| Docente | `profesor1` | `Docente123!` | Prof. Carlos Mendoza (4to A y 4to B) |
+- `API_BASE_URL`: URL de la API.
+- `APP_SLUG = 'ingles'`: slug de la materia, usado en `GET /contenidos/{slug}` y `GET /glosarios/{materia}`.
+- `USE_MOCK = false`: el login llama a la API real. Con `true` usa datos simulados sin conexión y muestra los botones **Enter as student** y **Enter as teacher**.
 
-En modo mock, el login también muestra los botones **Enter as student** y **Enter as teacher**. Para usar la API real, cambia `USE_MOCK` a `false` y pon la URL en `API_BASE_URL`.
+Cuentas de prueba de la API:
+
+| Rol | Usuario | Contraseña |
+|---|---|---|
+| Estudiante | `alumno1` | `Estudiante123!` |
+| Docente | `profesor1` | `Docente123!` |
 
 ## 5. Solución de problemas comunes
 
@@ -132,6 +136,7 @@ En modo mock, el login también muestra los botones **Enter as student** y **Ent
 | El celular no encuentra el servidor | Conecta el celular y la computadora a la misma red Wi-Fi. Si no funciona (por ejemplo, con el Wi-Fi de la universidad), usa `npx expo start --tunnel`. |
 | `You need to be signed in to Expo Go and Expo CLI` | Ejecuta `npx expo login` e inicia sesión en Expo Go con la misma cuenta. |
 | `localhost` no funciona desde el celular | En `src/config/apiConfig.js` usa la IP local de la compu (por ejemplo, `http://192.168.1.20:3000`) o la URL de producción. En el celular, `localhost` apunta al propio celular, no a tu computadora. |
+| El primer login tarda mucho (hasta ~1 minuto) | Es normal: el servidor gratuito de Render se "duerme" si nadie lo usa y tarda en despertar. Espera con el indicador de carga; las siguientes peticiones son rápidas. |
 | Puerto 8081 ocupado | Cierra el otro servidor de Expo, o responde que sí cuando la terminal pregunte si quieres usar otro puerto. |
 | Errores raros después de un `git pull` | Ejecuta `npm install` de nuevo. Si persisten, limpia la caché con `npx expo start -c`. |
 | Expo Go dice que la versión del SDK no es compatible | Actualiza Expo Go desde la tienda de tu celular. |
@@ -153,7 +158,7 @@ src/
 │       ├── TeacherHomeScreen.jsx # Panel del docente (pestaña "Panel")
 │       └── ProfileScreen.jsx    # Perfil del usuario y botón "Log out"
 ├── config/                      # Configuración compartida
-│   ├── apiConfig.js             # URL base de la API, USE_MOCK y timeout
+│   ├── apiConfig.js             # URL de la API, APP_SLUG, USE_MOCK y timeout
 │   ├── roles.js                 # ROLES y ROL_LABELS
 │   └── theme.js                 # Tema vintage: paleta, fuentes, tipografía, espaciados y medidas
 ├── navigation/                  # Navegadores de la app

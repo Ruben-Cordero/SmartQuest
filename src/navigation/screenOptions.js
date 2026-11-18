@@ -1,13 +1,14 @@
 import { colors, fonts, typography } from '../config/theme';
 
-// Cabecera vintage común: fondo azul, título crema en Luckiest Guy y flecha atrás
-// nativa en crema. El borde de tinta bajo la cabecera lo dibuja PaperBackground
-// (inkTop), porque la cabecera nativa no admite bordes propios.
+// Cabecera vintage común: fondo papel (integrado con la pantalla), título en tinta
+// con Luckiest Guy y flecha atrás nativa en tinta (14:1). El borde de tinta bajo la
+// cabecera lo dibuja PaperBackground (inkTop), porque la cabecera nativa no admite
+// bordes propios.
 export const headerOptions = {
-  headerStyle: { backgroundColor: colors.azul },
-  headerTintColor: colors.crema,
+  headerStyle: { backgroundColor: colors.papel },
+  headerTintColor: colors.tinta,
   headerTitleStyle: {
-    color: colors.crema,
+    color: colors.tinta,
     fontFamily: fonts.game,
     fontSize: typography.subtitle,
   },
