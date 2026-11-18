@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { colors, fonts, layout, spacing, typography } from '../../config/theme';
-import { InkCard, PaperBackground, TitleBanner } from '../../shared/components/vintage';
+import { ScreenTitle, SpaceBackground, SpaceCard } from '../../shared/components/space';
 import { useAuth } from '../../shared/context/AuthContext';
 
 export default function TeacherHomeScreen() {
@@ -9,20 +9,20 @@ export default function TeacherHomeScreen() {
   const nombre = usuario?.nombreCompleto || 'teacher';
 
   return (
-    <PaperBackground>
+    <SpaceBackground seed="dashboard">
       <ScrollView contentContainerStyle={styles.content}>
-        <TitleBanner title="Dashboard" sunburst />
-
-        <Text style={styles.greeting}>Hi, {nombre}!</Text>
-        <Text style={styles.text}>Check how your students are doing in English.</Text>
+        <ScreenTitle
+          title={`Hi, ${nombre}!`}
+          subtitle="Check how your students are doing in English."
+        />
 
         {/* Placeholder: se implementa en src/features/teacher-dashboard */}
-        <InkCard style={styles.card}>
+        <SpaceCard style={styles.card}>
           <Text style={styles.cardTitle}>Progress tracking</Text>
           <Text style={styles.text}>The progress of your classes will appear here soon.</Text>
-        </InkCard>
+        </SpaceCard>
       </ScrollView>
-    </PaperBackground>
+    </SpaceBackground>
   );
 }
 
@@ -34,28 +34,19 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
-  greeting: {
-    marginTop: spacing.lg,
-    fontFamily: fonts.bodyBold,
-    fontSize: typography.subtitle,
-    lineHeight: typography.subtitle * 1.3,
-    color: colors.tinta,
-  },
-  text: {
-    fontFamily: fonts.body,
-    fontSize: typography.body,
-    lineHeight: typography.body * 1.4,
-    color: colors.sepia,
-    marginTop: spacing.xs,
-  },
   card: {
     marginTop: spacing.lg,
   },
   cardTitle: {
-    fontFamily: fonts.game,
+    fontFamily: fonts.heading,
     fontSize: typography.label,
-    lineHeight: typography.label * 1.3,
-    color: colors.tinta,
-    letterSpacing: 0.5,
+    color: colors.primary,
+  },
+  text: {
+    marginTop: spacing.xs,
+    fontFamily: fonts.body,
+    fontSize: typography.body,
+    lineHeight: typography.body * 1.4,
+    color: colors.textMuted,
   },
 });

@@ -1,6 +1,6 @@
 // Dueño: Liam (T20).
 // Hoy: no muestra nada (devuelve null).
-// Falta: un botón (Button3D o un ícono de @expo/vector-icons) que reproduzca el audio de
+// Falta: un botón (SpaceButton o un ícono de @expo/vector-icons) que reproduzca el audio de
 // la pronunciación desde la URL recibida en linkAudio. Si linkAudio viene vacío o null,
 // debe seguir devolviendo null. Respetar "reducir movimiento" en cualquier animación y
 // usar un accessibilityLabel en inglés, por ejemplo "Play pronunciation".

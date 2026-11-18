@@ -3,25 +3,26 @@
 // Falta: cargar la lección con getLeccion(lessonId) de '../services/inglesApi',
 // mostrar su teoría (usa LessonExample de Liam para los ejemplos), estados de carga y
 // error, y "marcar como estudiada" con marcarEstudiado(lessonId) si no tiene cuestionario.
-// Aquí la barra de pestañas está oculta: PaperBackground respeta la zona segura inferior.
+// Aquí la barra de pestañas está oculta: SpaceBackground respeta la zona segura inferior.
+// El contenido de lectura va en LightCard (tarjeta clara, texto colors.onLessonCard).
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { colors, fonts, layout, spacing, typography } from '../../../config/theme';
-import { InkCard, PaperBackground } from '../../../shared/components/vintage';
+import { LightCard, SpaceBackground } from '../../../shared/components/space';
 
 export default function LessonDetailScreen({ route }) {
   const lessonId = route?.params?.lessonId;
 
   return (
-    <PaperBackground edges={['left', 'right', 'bottom']}>
+    <SpaceBackground edges={['left', 'right', 'bottom']} seed="lesson">
       <ScrollView contentContainerStyle={styles.content}>
-        <InkCard>
+        <LightCard>
           <Text style={styles.title} accessibilityRole="header" testID="lesson-detail-id">
             Lesson {lessonId ?? '—'}
           </Text>
-        </InkCard>
+        </LightCard>
       </ScrollView>
-    </PaperBackground>
+    </SpaceBackground>
   );
 }
 
@@ -36,6 +37,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: typography.subtitle,
     lineHeight: typography.subtitle * 1.3,
-    color: colors.tinta,
+    color: colors.onLessonCard,
   },
 });

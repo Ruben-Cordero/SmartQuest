@@ -26,22 +26,22 @@ function tabIcon(name) {
 }
 
 // Barra inferior de la app autenticada.
-// - Estudiante: Aprender · Glosario · Perfil.
-// - Docente:    Panel · Perfil.
+// - Estudiante: Galaxy · Glossary · Profile.
+// - Docente:    Dashboard · Profile.
 // Un rol no puede llegar a las pestañas del otro: no se registran en su navegador.
 export default function MainTabNavigator() {
   const { rol } = useAuth();
   const insets = useSafeAreaInsets();
   const esDocente = rol === ROLES.DOCENTE;
 
-  // Barra vintage: fondo tinta con borde superior ámbar; activa en ámbar (11.3:1)
-  // e inactiva en crema translúcido (7.4:1).
+  // Barra espacial: superficie oscura con borde suave; activa en dorado (10:1 aprox.)
+  // e inactiva en texto secundario (6.9:1).
   const tabBarStyle = {
     height: TAB_BAR_HEIGHT + insets.bottom,
     paddingBottom: insets.bottom,
-    backgroundColor: colors.tinta,
-    borderTopColor: colors.ambar,
-    borderTopWidth: layout.inkBorder,
+    backgroundColor: colors.surfaceAlt,
+    borderTopColor: colors.border,
+    borderTopWidth: layout.borderWidth,
   };
 
   return (
@@ -50,13 +50,12 @@ export default function MainTabNavigator() {
       backBehavior="history"
       screenOptions={{
         ...headerOptions,
-        sceneStyle: { backgroundColor: colors.papel },
-        tabBarActiveTintColor: colors.ambar,
-        tabBarInactiveTintColor: colors.creamMuted,
+        sceneStyle: { backgroundColor: colors.background },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
-          fontFamily: fonts.game,
+          fontFamily: fonts.heading,
           fontSize: typography.body,
-          letterSpacing: 0.5,
         },
         tabBarItemStyle: { minHeight: layout.minTouchSize, paddingVertical: spacing.xs },
         tabBarStyle,
@@ -80,11 +79,11 @@ export default function MainTabNavigator() {
             name={MAIN_TABS.LEARN}
             component={EnglishNavigator}
             options={({ route }) => ({
-              title: 'Learn',
+              title: 'Galaxy',
               // El stack de Inglés trae sus propias cabeceras.
               headerShown: false,
-              tabBarIcon: tabIcon('book'),
-              tabBarAccessibilityLabel: 'Learn: English worlds and levels',
+              tabBarIcon: tabIcon('planet'),
+              tabBarAccessibilityLabel: 'Galaxy: your English planets',
               // Dentro del detalle de una lección la barra se oculta para leer a pantalla completa.
               tabBarStyle:
                 getFocusedRouteNameFromRoute(route) === ENGLISH_ROUTES.LESSON_DETAIL

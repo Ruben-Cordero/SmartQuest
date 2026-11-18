@@ -1,4 +1,4 @@
-import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -10,14 +10,14 @@ import { AuthProvider, useAuth } from '../shared/context/AuthContext';
 
 // Colores base de React Navigation alineados con el tema (evita destellos blancos).
 const navigationTheme = {
-  ...DefaultTheme,
+  ...DarkTheme,
   colors: {
-    ...DefaultTheme.colors,
-    primary: colors.azul,
-    background: colors.papel,
-    card: colors.papel,
-    text: colors.tinta,
-    border: colors.tinta,
+    ...DarkTheme.colors,
+    primary: colors.primary,
+    background: colors.background,
+    card: colors.background,
+    text: colors.text,
+    border: colors.border,
   },
 };
 
@@ -33,8 +33,8 @@ function RootNavigator() {
 
   return (
     <>
-      {/* Cabeceras y login son color papel: hora y batería en oscuro. */}
-      <StatusBar style="dark" />
+      {/* Todo el universo es oscuro: hora y batería en claro. */}
+      <StatusBar style="light" />
       {estaAutenticado ? <AppNavigator /> : <AuthNavigator />}
     </>
   );

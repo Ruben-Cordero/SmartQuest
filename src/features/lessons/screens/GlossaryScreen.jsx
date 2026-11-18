@@ -6,16 +6,16 @@
 import { ScrollView, StyleSheet } from 'react-native';
 
 import { layout, spacing } from '../../../config/theme';
-import { MessageBubble, PaperBackground, TitleBanner } from '../../../shared/components/vintage';
+import { MessageBubble, ScreenTitle, SpaceBackground } from '../../../shared/components/space';
 
 export default function GlossaryScreen() {
   return (
-    <PaperBackground>
+    <SpaceBackground seed="glossary">
       <ScrollView contentContainerStyle={styles.content}>
-        <TitleBanner title="Glossary" sunburst />
+        <ScreenTitle title="Glossary" />
         <MessageBubble style={styles.bubble}>Coming soon</MessageBubble>
       </ScrollView>
-    </PaperBackground>
+    </SpaceBackground>
   );
 }
 
