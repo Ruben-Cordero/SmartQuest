@@ -13,12 +13,13 @@ import {
 import { USE_MOCK } from '../../config/apiConfig';
 import { colors, fonts, layout, radius, spacing, typography } from '../../config/theme';
 import {
-  Button3D,
-  InkCard,
   MessageBubble,
-  PaperBackground,
-  TitleBanner,
-} from '../../shared/components/vintage';
+  Planet,
+  ScreenTitle,
+  SpaceBackground,
+  SpaceButton,
+  SpaceCard,
+} from '../../shared/components/space';
 import { useAuth } from '../../shared/context/AuthContext';
 import { MOCK_ACCOUNTS } from '../../shared/services/authService';
 
@@ -52,7 +53,7 @@ export default function LoginScreen() {
   const mensajeError = error || aviso;
 
   return (
-    <PaperBackground edges={['top', 'bottom', 'left', 'right']} inkTop={false}>
+    <SpaceBackground edges={['top', 'bottom', 'left', 'right']} seed="login">
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -62,11 +63,23 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.column}>
-            <TitleBanner title="SmartQuest" sunburst />
+            {/* Planeta decorativo (sin etiqueta: los lectores de pantalla lo ignoran) */}
+            <Planet
+              seed="smartquest-home"
+              theme="cyan"
+              size={120}
+              state="current"
+              style={styles.hero}
+            />
+            <ScreenTitle
+              title="SmartQuest"
+              subtitle="Your English adventure across the universe."
+              align="center"
+            />
 
             <MessageBubble style={styles.greeting}>Hi, explorer! Log in to take off.</MessageBubble>
 
-            <InkCard style={styles.form}>
+            <SpaceCard style={styles.form}>
               <Text style={styles.label} nativeID="labelUsuario">
                 Username
               </Text>
@@ -75,7 +88,7 @@ export default function LoginScreen() {
                 value={username}
                 onChangeText={setUsername}
                 placeholder="Your username"
-                placeholderTextColor={colors.sepia}
+                placeholderTextColor={colors.textMuted}
                 autoCapitalize="none"
                 autoCorrect={false}
                 autoComplete="username"
@@ -95,7 +108,7 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                   placeholder="Your password"
-                  placeholderTextColor={colors.sepia}
+                  placeholderTextColor={colors.textMuted}
                   secureTextEntry={!mostrarPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -123,19 +136,19 @@ export default function LoginScreen() {
                 </MessageBubble>
               ) : null}
 
-              <Button3D
+              <SpaceButton
                 title="Log in"
                 onPress={() => ingresar(username, password)}
                 disabled={!camposCompletos}
                 loading={enviando}
                 style={styles.submit}
               />
-            </InkCard>
+            </SpaceCard>
 
             {USE_MOCK && (
               <View style={styles.mockSection}>
                 <Text style={styles.mockTitle}>Quick access (test mode)</Text>
-                <Button3D
+                <SpaceButton
                   title="Enter as student"
                   variant="secondary"
                   disabled={enviando}
@@ -143,7 +156,7 @@ export default function LoginScreen() {
                     ingresar(MOCK_ACCOUNTS.ESTUDIANTE.username, MOCK_ACCOUNTS.ESTUDIANTE.password)
                   }
                 />
-                <Button3D
+                <SpaceButton
                   title="Enter as teacher"
                   variant="secondary"
                   disabled={enviando}
@@ -157,7 +170,7 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </PaperBackground>
+    </SpaceBackground>
   );
 }
 
@@ -175,6 +188,10 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
+  hero: {
+    alignSelf: 'center',
+    marginBottom: spacing.sm,
+  },
   greeting: {
     marginTop: spacing.lg,
   },
@@ -182,24 +199,23 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   label: {
-    fontFamily: fonts.game,
-    fontSize: typography.body,
-    lineHeight: typography.body * 1.3,
-    color: colors.tinta,
-    letterSpacing: 0.5,
+    fontFamily: fonts.heading,
+    fontSize: typography.label,
+    color: colors.text,
     marginBottom: spacing.xs,
     marginTop: spacing.sm,
   },
+  // El borde usa textMuted (6.9:1) para cumplir el 3:1 de los controles.
   input: {
     minHeight: layout.minTouchSize,
-    borderWidth: layout.inkBorder,
-    borderColor: colors.tinta,
-    borderRadius: radius.ink,
+    borderWidth: layout.borderWidth,
+    borderColor: colors.textMuted,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     fontFamily: fonts.body,
     fontSize: typography.body,
-    color: colors.tinta,
-    backgroundColor: colors.papel,
+    color: colors.text,
+    backgroundColor: colors.surfaceAlt,
   },
   passwordRow: {
     flexDirection: 'row',
@@ -215,10 +231,9 @@ const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   toggleText: {
-    fontFamily: fonts.game,
+    fontFamily: fonts.heading,
     fontSize: typography.body,
-    color: colors.tinta,
-    textDecorationLine: 'underline',
+    color: colors.primary,
   },
   error: {
     marginTop: spacing.md,
@@ -230,9 +245,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   mockTitle: {
-    fontFamily: fonts.detail,
+    fontFamily: fonts.body,
     fontSize: typography.body,
-    color: colors.sepia,
+    color: colors.textMuted,
     textAlign: 'center',
     marginBottom: spacing.sm,
   },

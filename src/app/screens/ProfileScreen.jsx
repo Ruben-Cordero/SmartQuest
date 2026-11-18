@@ -3,7 +3,13 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ROL_LABELS, ROLES } from '../../config/roles';
 import { colors, fonts, layout, spacing, typography } from '../../config/theme';
-import { Button3D, InkCard, PaperBackground, TitleBanner } from '../../shared/components/vintage';
+import {
+  Avatar,
+  ScreenTitle,
+  SpaceBackground,
+  SpaceButton,
+  SpaceCard,
+} from '../../shared/components/space';
 import { useAuth } from '../../shared/context/AuthContext';
 
 const SIN_DATOS = 'No data';
@@ -40,11 +46,19 @@ export default function ProfileScreen() {
     : [];
 
   return (
-    <PaperBackground>
+    <SpaceBackground seed="profile">
       <ScrollView contentContainerStyle={styles.content}>
-        <TitleBanner title={valorOSinDatos(usuario?.nombreCompleto)} sunburst />
+        <View style={styles.hero}>
+          <Avatar name={usuario?.nombreCompleto} size={88} />
+          <ScreenTitle
+            title={valorOSinDatos(usuario?.nombreCompleto)}
+            subtitle={valorOSinDatos(ROL_LABELS[rol])}
+            align="center"
+            style={styles.heroTitle}
+          />
+        </View>
 
-        <InkCard style={styles.card}>
+        <SpaceCard style={styles.card}>
           <Fila etiqueta="Full name">{valorOSinDatos(usuario?.nombreCompleto)}</Fila>
           <Fila etiqueta="Username">{valorOSinDatos(usuario?.username)}</Fila>
           <Fila etiqueta="Role">{valorOSinDatos(ROL_LABELS[rol])}</Fila>
@@ -67,9 +81,9 @@ export default function ProfileScreen() {
               )}
             </Fila>
           )}
-        </InkCard>
+        </SpaceCard>
 
-        <Button3D
+        <SpaceButton
           title="Log out"
           variant="danger"
           onPress={cerrarSesion}
@@ -77,7 +91,7 @@ export default function ProfileScreen() {
           style={styles.logout}
         />
       </ScrollView>
-    </PaperBackground>
+    </SpaceBackground>
   );
 }
 
@@ -89,6 +103,13 @@ const styles = StyleSheet.create({
     maxWidth: layout.maxContentWidth,
     alignSelf: 'center',
   },
+  hero: {
+    alignItems: 'center',
+    marginTop: spacing.md,
+  },
+  heroTitle: {
+    marginTop: spacing.md,
+  },
   card: {
     marginTop: spacing.lg,
   },
@@ -96,15 +117,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   label: {
-    fontFamily: fonts.detail,
+    fontFamily: fonts.body,
     fontSize: typography.body,
-    color: colors.sepia,
+    color: colors.textMuted,
   },
   value: {
     fontFamily: fonts.bodyBold,
     fontSize: typography.body,
     lineHeight: typography.body * 1.4,
-    color: colors.tinta,
+    color: colors.text,
     marginTop: spacing.xs,
   },
   logout: {

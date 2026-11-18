@@ -34,9 +34,10 @@ Tiene dos roles: **estudiante** y **docente**. El docente cuenta con un panel pa
 | React Navigation | `@react-navigation/native ^7.5.1`, `@react-navigation/native-stack ^7.21.0` | Es la navegación elegida para el proyecto, en lugar de expo-router. |
 | Bottom Tabs | `@react-navigation/bottom-tabs ^7.22.0` | Barra de navegación inferior de la app autenticada. |
 | Íconos | `@expo/vector-icons ^15.0.2` | Íconos de la barra inferior y de las pantallas (Ionicons). |
-| Fuentes | `expo-font ~58.0.12` y `@expo-google-fonts/` ultra, luckiest-guy, nunito y special-elite | Tipografías del estilo vintage. |
+| Fuentes | `expo-font ~58.0.12`, `@expo-google-fonts/space-grotesk` y `@expo-google-fonts/inter` | Space Grotesk (títulos) e Inter (texto). |
 | Splash | `expo-splash-screen ~58.0.14` | Mantiene el splash visible hasta que cargan las fuentes. |
-| Gráficos | `expo-linear-gradient ~58.0.4` y `react-native-svg 15.16.0` | Viñeta del papel, rayos de sol y cintas. |
+| Gráficos | `react-native-svg 15.16.0` | Fondo de estrellas y nebulosas, planetas y caminos del mapa. |
+| Animaciones | `react-native-reanimated 4.7.1` y `react-native-worklets` | Pulso del planeta actual, nave y esqueletos de carga, en el hilo de UI. Expo configura el plugin de babel solo. |
 | axios | `^1.21.0` | Centraliza las llamadas a la API. |
 | AsyncStorage | `@react-native-async-storage/async-storage 2.2.0` | Guarda en el celular datos locales que no son sensibles. |
 | expo-secure-store | `~58.0.2` | Guarda de forma cifrada datos sensibles, como el token de sesión. |
@@ -113,16 +114,20 @@ Deja esa terminal abierta mientras trabajas. Aparecerá un código QR.
 - Sacude el celular y elige **Reload**.
 - Presiona la tecla `r` en la terminal donde corre el servidor.
 
-### Usuarios de prueba (mock)
+### API y usuarios de prueba
 
-Mientras `USE_MOCK = true` en `src/config/apiConfig.js`, el login no llama a la API y acepta solo estas cuentas:
+La app usa la API central de Virtu: `https://backend-virtu.onrender.com/api` (documentación interactiva en [`/api/docs`](https://backend-virtu.onrender.com/api/docs/)). La configuración está en `src/config/apiConfig.js`:
 
-| Rol | Usuario | Contraseña | Nombre |
-|---|---|---|---|
-| Estudiante | `alumno1` | `Estudiante123!` | Sofía Valenzuela (4to de Secundaria A) |
-| Docente | `profesor1` | `Docente123!` | Prof. Carlos Mendoza (4to A y 4to B) |
+- `API_BASE_URL`: URL de la API.
+- `APP_SLUG = 'ingles'`: slug de la materia, usado en `GET /contenidos/{slug}` y `GET /glosarios/{materia}`.
+- `USE_MOCK = false`: el login llama a la API real. Con `true` usa datos simulados sin conexión y muestra los botones **Enter as student** y **Enter as teacher**.
 
-En modo mock, el login también muestra los botones **Enter as student** y **Enter as teacher**. Para usar la API real, cambia `USE_MOCK` a `false` y pon la URL en `API_BASE_URL`.
+Cuentas de prueba de la API:
+
+| Rol | Usuario | Contraseña |
+|---|---|---|
+| Estudiante | `alumno1` | `Estudiante123!` |
+| Docente | `profesor1` | `Docente123!` |
 
 ## 5. Solución de problemas comunes
 
@@ -132,6 +137,7 @@ En modo mock, el login también muestra los botones **Enter as student** y **Ent
 | El celular no encuentra el servidor | Conecta el celular y la computadora a la misma red Wi-Fi. Si no funciona (por ejemplo, con el Wi-Fi de la universidad), usa `npx expo start --tunnel`. |
 | `You need to be signed in to Expo Go and Expo CLI` | Ejecuta `npx expo login` e inicia sesión en Expo Go con la misma cuenta. |
 | `localhost` no funciona desde el celular | En `src/config/apiConfig.js` usa la IP local de la compu (por ejemplo, `http://192.168.1.20:3000`) o la URL de producción. En el celular, `localhost` apunta al propio celular, no a tu computadora. |
+| El primer login tarda mucho (hasta ~1 minuto) | Es normal: el servidor gratuito de Render se "duerme" si nadie lo usa y tarda en despertar. Espera con el indicador de carga; las siguientes peticiones son rápidas. |
 | Puerto 8081 ocupado | Cierra el otro servidor de Expo, o responde que sí cuando la terminal pregunte si quieres usar otro puerto. |
 | Errores raros después de un `git pull` | Ejecuta `npm install` de nuevo. Si persisten, limpia la caché con `npx expo start -c`. |
 | Expo Go dice que la versión del SDK no es compatible | Actualiza Expo Go desde la tienda de tu celular. |
@@ -153,21 +159,21 @@ src/
 │       ├── TeacherHomeScreen.jsx # Panel del docente (pestaña "Panel")
 │       └── ProfileScreen.jsx    # Perfil del usuario y botón "Log out"
 ├── config/                      # Configuración compartida
-│   ├── apiConfig.js             # URL base de la API, USE_MOCK y timeout
+│   ├── apiConfig.js             # URL de la API, APP_SLUG, USE_MOCK y timeout
 │   ├── roles.js                 # ROLES y ROL_LABELS
-│   └── theme.js                 # Tema vintage: paleta, fuentes, tipografía, espaciados y medidas
+│   └── theme.js                 # Tema espacial: paleta, fuentes, tipografía, espaciados y medidas
 ├── navigation/                  # Navegadores de la app
 │   ├── AppNavigator.jsx         # Con sesión: valida el rol y monta MainTabNavigator
 │   ├── AuthNavigator.jsx        # Sin sesión: pantalla de login
-│   ├── MainTabNavigator.jsx     # Barra inferior. Estudiante: Learn · Glossary · Profile. Docente: Dashboard · Profile
+│   ├── MainTabNavigator.jsx     # Barra inferior. Estudiante: Galaxy · Glossary · Profile. Docente: Dashboard · Profile
 │   ├── tabRoutes.js             # Nombres de las pestañas (MAIN_TABS)
 │   └── screenOptions.js         # Estilo común del header
 ├── features/                    # Funcionalidades de la app (cada una con screens/, components/ y services/)
 │   ├── lessons/                 # Unidades y lecciones de inglés
-│   │   ├── data/                # Datos locales (lessons.mock.js hasta que llegue lessons.js)
-│   │   ├── navigation/          # EnglishNavigator (temas → lección), routes.js y placeholders/
-│   │   ├── screens/             # EnglishTopicsScreen
-│   │   ├── services/            # lessons.js: getUnits()
+│   │   ├── components/          # galaxy/ (piezas del mapa), LessonExample y PronunciationButton
+│   │   ├── navigation/          # EnglishNavigator (temas → lección) y routes.js
+│   │   ├── screens/             # GalaxyMapScreen, LessonDetailScreen y GlossaryScreen
+│   │   ├── services/            # inglesApi.js (API) y lessons.js (normalizeUnits)
 │   │   └── index.js             # Exporta EnglishNavigator, ENGLISH_ROUTES y GlossaryScreen
 │   ├── quiz/                    # Cuestionarios
 │   ├── vocabulary/              # Glosario: palabra, definición, pronunciación, tiempo verbal, audio y ejemplo
@@ -175,10 +181,10 @@ src/
 │   └── teacher-dashboard/       # Panel del docente
 └── shared/                      # Código común a varias funcionalidades
     ├── components/              # Componentes UI reutilizables
-    │   ├── Button.jsx           # Alias de Button3D (compatibilidad)
+    │   ├── Button.jsx           # Alias de SpaceButton (compatibilidad)
     │   ├── LoadingView.jsx      # Pantalla de carga
-    │   └── vintage/             # Estética años 30: PaperBackground, InkCard, Button3D, TitleBanner,
-    │                            # Ribbon, MessageBubble, HardShadow y useReduceMotion (index.js)
+    │   └── space/               # Tema espacial: SpaceBackground, Planet, SpaceCard, LightCard,
+    │                            # SpaceButton, ScreenTitle, MessageBubble, ProgressBar y Avatar (index.js)
     ├── context/
     │   └── AuthContext.jsx      # AuthProvider y useAuth(): usuario, token, rol, login, logout...
     └── services/
@@ -191,14 +197,55 @@ src/
 - **Todo el texto que ve el usuario va en inglés** (botones, títulos, pestañas, mensajes de error y etiquetas de accesibilidad): es una app para aprender inglés.
 - Los comentarios del código y la documentación del equipo siguen en español.
 
-### Estilo visual (vintage años 30)
+### Estilo visual (tema espacial)
+
+La app es un universo: cada **unidad** es una **galaxia** y cada **lección** un **planeta**.
 
 - Todo sale de `src/config/theme.js`. No escribas colores, fuentes ni tamaños a mano.
-- Fuentes: `fonts.display` (Ultra) para títulos grandes, `fonts.game` (Luckiest Guy) para botones, pestañas y etiquetas cortas, `fonts.body`/`fonts.bodyBold` (Nunito) para **todo** el texto de lectura (mínimo 16) y `fonts.detail` (Special Elite) para notas pequeñas.
-- El rojo (`colors.rojo`) es **solo** para errores, respuestas incorrectas o cancelar. El verde (`colors.verde`) solo para aciertos.
-- Con fuentes personalizadas no uses `fontWeight`: usa la familia correspondiente (por ejemplo `fonts.bodyBold`).
-- Usa los componentes de `src/shared/components/vintage`. Las animaciones deben respetar "reducir movimiento" (`useReduceMotion`).
-- No se agregan mascotas, personajes, rachas, insignias, vidas, monedas ni temporizadores.
+- Fuentes: `fonts.display` / `fonts.heading` (Space Grotesk) para títulos, botones y pestañas; `fonts.body`, `fonts.bodyMedium` y `fonts.bodyBold` (Inter) para el texto de lectura (mínimo 16). Con fuentes personalizadas no uses `fontWeight`: usa la familia correspondiente.
+- Colores: fondo oscuro (`colors.background`), tarjetas (`colors.surface`), dorado (`colors.primary`) para estrellas y la acción principal, verde energía (`colors.energy`) para aciertos y progreso. `colors.danger` es **solo** para errores, respuestas incorrectas o salir.
+- El contenido de lectura de las lecciones va en una tarjeta **clara**: `LightCard` con texto `colors.onLessonCard`.
+- Usa los componentes de `src/shared/components/space` (`SpaceBackground`, `Planet`, `SpaceCard`, `LightCard`, `SpaceButton`, `ScreenTitle`, `MessageBubble`, `ProgressBar`, `Avatar`).
+- Animaciones con `react-native-reanimated` y respetando "reducir movimiento" (`useReducedMotion()` o `.reduceMotion(ReduceMotion.System)`).
+- Botones y planetas tocables de al menos 48 px y con `accessibilityLabel`.
+- XP, rachas, ranking y nivel del usuario **no se muestran**: la API todavía no los tiene (no se inventan).
+
+### Estructura del módulo de Inglés
+
+El módulo vive en `src/features/lessons/` (las guías antiguas dicen `src/modules/ingles/`: es la misma cosa). Todos los archivos ya existen y están conectados; al integrar, cada uno solo edita el suyo, sin crear archivos nuevos ni cambiar importaciones.
+
+```text
+src/features/lessons/
+├── components/
+│   ├── galaxy/                  # Rubén · piezas del mapa: GalaxyHeader, GalaxyCard, PlanetPath, SpaceShip, BlackHole, MapSkeleton
+│   ├── LessonExample.jsx        # Liam (T12) · ejemplo de una lección en una LightCard
+│   └── PronunciationButton.jsx  # Liam (T20) · botón de audio de pronunciación (pendiente)
+├── navigation/
+│   ├── EnglishNavigator.jsx     # Rubén · stack mapa de galaxias → detalle del planeta
+│   └── routes.js                # Rubén · nombres de rutas (ENGLISH_ROUTES)
+├── screens/
+│   ├── GalaxyMapScreen.jsx      # Rubén (T06, T07, T08, T16) · mapa de galaxias y planetas
+│   ├── LessonDetailScreen.jsx   # Estrella (T09–T11) · detalle de lección (recibe route.params.lessonId)
+│   └── GlossaryScreen.jsx       # Liam (T14, T15, T20) · glosario (pestaña Glossary)
+├── services/
+│   ├── inglesApi.js             # Marvin (T03) · ÚNICO servicio de la API del módulo
+│   ├── lessons.js               # Rubén · normalizeUnits(): adapta la respuesta de /contenidos
+│   └── galaxy.js                # Rubén · buildGalaxies() y geometría del camino del mapa
+└── index.js                     # Rubén · exporta EnglishNavigator, ENGLISH_ROUTES y GlossaryScreen
+```
+
+La tab bar (`src/navigation/MainTabNavigator.jsx`, de Rubén) monta `EnglishNavigator` en la pestaña **Galaxy** y `GlossaryScreen` en la pestaña **Glossary**.
+
+Funciones de `inglesApi.js` (todas usan el cliente central con token, devuelven `data` y lanzan un `Error` con el `message` de la API):
+
+| Función | Endpoint |
+|---|---|
+| `getContenidoIngles()` | `GET /contenidos/ingles` |
+| `getLeccion(id)` | `GET /lecciones/:id` |
+| `marcarEstudiado(id)` | `POST /lecciones/:id/marcar-estudiado` |
+| `buscarGlosario(q)` | `GET /glosarios/ingles` (con `?q=` solo si hay texto) |
+
+> **Regla:** cada uno edita solo sus archivos. Si necesitas una llamada nueva a la API, pídesela a Marvin para que la agregue en `inglesApi.js`.
 
 ### Sesión y roles
 

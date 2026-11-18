@@ -1,22 +1,21 @@
 import { colors, fonts, typography } from '../config/theme';
 
-// Cabecera vintage común: fondo azul, título crema en Luckiest Guy y flecha atrás
-// nativa en crema. El borde de tinta bajo la cabecera lo dibuja PaperBackground
-// (inkTop), porque la cabecera nativa no admite bordes propios.
+// Cabecera espacial común: fondo del espacio, título en Space Grotesk y flecha
+// atrás nativa en color texto (16.7:1), con una línea de borde suave debajo.
 export const headerOptions = {
-  headerStyle: { backgroundColor: colors.azul },
-  headerTintColor: colors.crema,
+  headerStyle: { backgroundColor: colors.background },
+  headerTintColor: colors.text,
   headerTitleStyle: {
-    color: colors.crema,
-    fontFamily: fonts.game,
+    color: colors.text,
+    fontFamily: fonts.heading,
     fontSize: typography.subtitle,
   },
-  headerBackTitleStyle: { fontFamily: fonts.game },
+  headerBackTitleStyle: { fontFamily: fonts.heading },
   headerShadowVisible: false,
 };
 
 // Opciones para los stacks (native-stack).
 export const defaultScreenOptions = {
   ...headerOptions,
-  contentStyle: { backgroundColor: colors.papel },
+  contentStyle: { backgroundColor: colors.background },
 };
