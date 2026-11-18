@@ -96,11 +96,9 @@ export default function MainTabNavigator() {
             name={MAIN_TABS.GLOSSARY}
             component={GlossaryScreen}
             options={{
-              // La pestaña dice "Glossary" porque "Word Notebook" es más largo.
               title: 'Glossary',
-              headerTitle: 'Word Notebook',
               tabBarIcon: tabIcon('search'),
-              tabBarAccessibilityLabel: 'Word Notebook',
+              tabBarAccessibilityLabel: 'Glossary',
             }}
           />
         </>

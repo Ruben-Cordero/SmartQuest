@@ -1,9 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { useMemo, useRef } from 'react';
-import { SectionList, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts, layout, spacing, typography } from '../../../config/theme';
+import { colors, fonts, layout, radius, spacing, typography } from '../../../config/theme';
 import {
   Button3D,
   InkCard,
@@ -14,12 +14,15 @@ import {
   useReduceMotion,
 } from '../../../shared/components/vintage';
 import { ENGLISH_ROUTES } from '../navigation/routes';
-import { getUnits } from '../services/lessons';
+import { getContenidoIngles } from '../services/inglesApi';
+import { LESSON_STATUS, normalizeUnits } from '../services/lessons';
 
-// Lista de mundos (unidades) y niveles (lecciones) del módulo de Inglés.
+// Lista de mundos (unidades) y niveles (lecciones) del módulo de Inglés, desde
+// GET /contenidos/ingles. La pantalla nunca llama a fetch ni a axios directamente.
 // La cabecera del stack cubre la barra de estado y la barra de pestañas cubre
 // la zona segura inferior; PaperBackground respeta los laterales.
 const LESSON_TITLE_MAX_LINES = 2;
+const LOAD_STATE = { LOADING: 'loading', READY: 'ready', ERROR: 'error' };
 
 // Encabezado con un botón por mundo para saltar directo a sus niveles.
 function ListHeader({ worlds, onSelectWorld }) {
@@ -45,11 +48,52 @@ function ListHeader({ worlds, onSelectWorld }) {
   );
 }
 
-function EmptyList() {
+// Lo que se ve cuando no hay secciones: cargando, error con "Retry" o lista vacía.
+function ListStatus({ loadState, errorMessage, onRetry }) {
+  if (loadState === LOAD_STATE.LOADING) {
+    return (
+      <View style={styles.status}>
+        <ActivityIndicator
+          size="large"
+          color={colors.azul}
+          accessibilityRole="progressbar"
+          accessibilityLabel="Loading lessons"
+        />
+        <Text style={styles.statusText}>Loading lessons...</Text>
+      </View>
+    );
+  }
+
+  if (loadState === LOAD_STATE.ERROR) {
+    return (
+      <View style={styles.status}>
+        <MessageBubble tone="error">{errorMessage}</MessageBubble>
+        <Button3D title="Retry" onPress={onRetry} style={styles.retry} />
+      </View>
+    );
+  }
+
+  return <MessageBubble style={styles.status}>There are no lessons available yet.</MessageBubble>;
+}
+
+// Etiqueta de estado: STUDIED en verde (acierto) o PENDING neutra. Nunca rojo.
+// El texto va en tinta o sepia para cumplir 4.5:1; el verde se usa en borde e ícono.
+function StatusTag({ status }) {
+  const estudiado = status === LESSON_STATUS.STUDIED;
   return (
-    <MessageBubble style={styles.empty}>
-      There are no worlds available yet. Come back soon to start practicing.
-    </MessageBubble>
+    <View style={[styles.tag, estudiado ? styles.tagStudied : styles.tagPending]}>
+      <Ionicons
+        name={estudiado ? 'checkmark-circle' : 'ellipse-outline'}
+        size={typography.body}
+        color={estudiado ? colors.verde : colors.sepia}
+        style={styles.tagIcon}
+        accessibilityElementsHidden
+        importantForAccessibility="no"
+      />
+      <Text style={[styles.tagText, !estudiado && styles.tagTextPending]}>
+        {estudiado ? 'STUDIED' : 'PENDING'}
+      </Text>
+    </View>
   );
 }
 
@@ -71,10 +115,11 @@ function LessonSeparator() {
 }
 
 function LessonRow({ lesson, level, onPress }) {
+  const estado = lesson.status === LESSON_STATUS.STUDIED ? 'studied' : 'pending';
   return (
     <InkCard
       onPress={onPress}
-      accessibilityLabel={`Level ${level}: ${lesson.title}`}
+      accessibilityLabel={`Level ${level}: ${lesson.title}, ${estado}`}
       accessibilityHint="Opens the level"
       testID={`lesson-${lesson.id}`}
       contentStyle={styles.lesson}
@@ -84,6 +129,7 @@ function LessonRow({ lesson, level, onPress }) {
         <Text style={styles.lessonTitle} numberOfLines={LESSON_TITLE_MAX_LINES}>
           {lesson.title}
         </Text>
+        <StatusTag status={lesson.status} />
       </View>
       <Ionicons
         name="chevron-forward"
@@ -100,17 +146,56 @@ export default function EnglishTopicsScreen() {
   const navigation = useNavigation();
   const listRef = useRef(null);
   const reduceMotion = useReduceMotion();
+  const [units, setUnits] = useState([]);
+  const [loadState, setLoadState] = useState(LOAD_STATE.LOADING);
+  const [errorMessage, setErrorMessage] = useState('');
+  // Cambiarlo vuelve a disparar la carga (botón "Retry").
+  const [attempt, setAttempt] = useState(0);
+
+  // Al montar (y en cada reintento) se piden las unidades a la API. Un 401 no se
+  // maneja aquí: la base no tiene un flujo global para eso, así que solo se
+  // muestra el mensaje de la API.
+  useEffect(() => {
+    let activo = true;
+
+    async function cargar() {
+      try {
+        const contenido = await getContenidoIngles();
+        if (!activo) return;
+        setUnits(normalizeUnits(contenido));
+        setLoadState(LOAD_STATE.READY);
+      } catch (error) {
+        if (!activo) return;
+        setUnits([]);
+        setErrorMessage(error?.message || 'Could not load the lessons. Please try again.');
+        setLoadState(LOAD_STATE.ERROR);
+      }
+    }
+
+    cargar();
+    return () => {
+      activo = false;
+    };
+  }, [attempt]);
+
+  function handleRetry() {
+    setLoadState(LOAD_STATE.LOADING);
+    setAttempt((n) => n + 1);
+  }
 
   // Cada unidad es una sección; SectionList espera las filas en "data".
+  // Las unidades sin lecciones no se muestran como sección vacía.
   const sections = useMemo(
     () =>
-      getUnits().map((unit, index) => ({
-        id: unit.id,
-        number: index + 1,
-        title: unit.title,
-        data: unit.lessons,
-      })),
-    [],
+      units
+        .filter((unit) => unit.lessons.length > 0)
+        .map((unit, index) => ({
+          id: unit.id,
+          number: index + 1,
+          title: unit.title,
+          data: unit.lessons,
+        })),
+    [units],
   );
 
   function handleOpenLesson(lessonId) {
@@ -144,7 +229,9 @@ export default function EnglishTopicsScreen() {
         sections={sections}
         keyExtractor={(lesson) => lesson.id}
         ListHeaderComponent={<ListHeader worlds={sections} onSelectWorld={goToWorld} />}
-        ListEmptyComponent={EmptyList}
+        ListEmptyComponent={
+          <ListStatus loadState={loadState} errorMessage={errorMessage} onRetry={handleRetry} />
+        }
         ItemSeparatorComponent={LessonSeparator}
         stickySectionHeadersEnabled={false}
         onScrollToIndexFailed={handleScrollToIndexFailed}
@@ -230,7 +317,47 @@ const styles = StyleSheet.create({
     lineHeight: typography.label * 1.35,
     color: colors.tinta,
   },
-  empty: {
+  status: {
     marginTop: spacing.lg,
+  },
+  statusText: {
+    marginTop: spacing.md,
+    fontFamily: fonts.body,
+    fontSize: typography.body,
+    color: colors.sepia,
+    textAlign: 'center',
+  },
+  retry: {
+    marginTop: spacing.md,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderWidth: layout.inkBorder - 1,
+    borderRadius: radius.sm,
+    backgroundColor: colors.papel,
+  },
+  tagStudied: {
+    borderColor: colors.verde,
+  },
+  tagPending: {
+    borderColor: colors.sepia,
+  },
+  tagIcon: {
+    marginRight: spacing.xs,
+  },
+  tagText: {
+    fontFamily: fonts.game,
+    fontSize: typography.body,
+    lineHeight: typography.body * 1.3,
+    color: colors.tinta,
+    letterSpacing: 0.5,
+  },
+  tagTextPending: {
+    color: colors.sepia,
   },
 });

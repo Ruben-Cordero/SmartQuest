@@ -169,10 +169,10 @@ src/
 │   └── screenOptions.js         # Estilo común del header
 ├── features/                    # Funcionalidades de la app (cada una con screens/, components/ y services/)
 │   ├── lessons/                 # Unidades y lecciones de inglés
-│   │   ├── data/                # Datos locales (lessons.mock.js hasta que llegue lessons.js)
-│   │   ├── navigation/          # EnglishNavigator (temas → lección), routes.js y placeholders/
-│   │   ├── screens/             # EnglishTopicsScreen
-│   │   ├── services/            # lessons.js: getUnits()
+│   │   ├── components/          # LessonExample y PronunciationButton
+│   │   ├── navigation/          # EnglishNavigator (temas → lección) y routes.js
+│   │   ├── screens/             # EnglishTopicsScreen, LessonDetailScreen y GlossaryScreen
+│   │   ├── services/            # inglesApi.js (API) y lessons.js (normalizeUnits)
 │   │   └── index.js             # Exporta EnglishNavigator, ENGLISH_ROUTES y GlossaryScreen
 │   ├── quiz/                    # Cuestionarios
 │   ├── vocabulary/              # Glosario: palabra, definición, pronunciación, tiempo verbal, audio y ejemplo
@@ -204,6 +204,41 @@ src/
 - Con fuentes personalizadas no uses `fontWeight`: usa la familia correspondiente (por ejemplo `fonts.bodyBold`).
 - Usa los componentes de `src/shared/components/vintage`. Las animaciones deben respetar "reducir movimiento" (`useReduceMotion`).
 - No se agregan mascotas, personajes, rachas, insignias, vidas, monedas ni temporizadores.
+
+### Estructura del módulo de Inglés
+
+El módulo vive en `src/features/lessons/` (las guías antiguas dicen `src/modules/ingles/`: es la misma cosa). Todos los archivos ya existen y están conectados; al integrar, cada uno solo edita el suyo, sin crear archivos nuevos ni cambiar importaciones.
+
+```text
+src/features/lessons/
+├── components/
+│   ├── LessonExample.jsx        # Liam (T12) · ejemplo de una lección en una InkCard
+│   └── PronunciationButton.jsx  # Liam (T20) · botón de audio de pronunciación (pendiente)
+├── navigation/
+│   ├── EnglishNavigator.jsx     # Rubén · stack temas → detalle de lección
+│   └── routes.js                # Rubén · nombres de rutas (ENGLISH_ROUTES)
+├── screens/
+│   ├── EnglishTopicsScreen.jsx  # Rubén (T06, T07, T08, T16) · lista de unidades y lecciones
+│   ├── LessonDetailScreen.jsx   # Estrella (T09–T11) · detalle de lección (recibe route.params.lessonId)
+│   └── GlossaryScreen.jsx       # Liam (T14, T15, T20) · glosario (pestaña Glossary)
+├── services/
+│   ├── inglesApi.js             # Marvin (T03) · ÚNICO servicio de la API del módulo
+│   └── lessons.js               # Rubén · normalizeUnits(): adapta la respuesta de /contenidos
+└── index.js                     # Rubén · exporta EnglishNavigator, ENGLISH_ROUTES y GlossaryScreen
+```
+
+La tab bar (`src/navigation/MainTabNavigator.jsx`, de Rubén) monta `EnglishNavigator` en la pestaña **Learn** y `GlossaryScreen` en la pestaña **Glossary**.
+
+Funciones de `inglesApi.js` (todas usan el cliente central con token, devuelven `data` y lanzan un `Error` con el `message` de la API):
+
+| Función | Endpoint |
+|---|---|
+| `getContenidoIngles()` | `GET /contenidos/ingles` |
+| `getLeccion(id)` | `GET /lecciones/:id` |
+| `marcarEstudiado(id)` | `POST /lecciones/:id/marcar-estudiado` |
+| `buscarGlosario(q)` | `GET /glosarios/ingles` (con `?q=` solo si hay texto) |
+
+> **Regla:** cada uno edita solo sus archivos. Si necesitas una llamada nueva a la API, pídesela a Marvin para que la agregue en `inglesApi.js`.
 
 ### Sesión y roles
 
