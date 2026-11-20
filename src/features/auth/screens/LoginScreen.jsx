@@ -13,8 +13,8 @@ import {
 import { USE_MOCK } from '../../../config/apiConfig';
 import { colors, fonts, layout, radius, spacing, typography } from '../../../config/theme';
 import {
+  Astronaut,
   MessageBubble,
-  Planet,
   ScreenTitle,
   SpaceBackground,
   SpaceButton,
@@ -63,14 +63,8 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.column}>
-            {/* Planeta decorativo (sin etiqueta: los lectores de pantalla lo ignoran) */}
-            <Planet
-              seed="smartquest-home"
-              theme="cyan"
-              size={120}
-              state="current"
-              style={styles.hero}
-            />
+            {/* Astronauta que flota y saluda (decorativo: el saludo va en el globo) */}
+            <Astronaut size={130} style={styles.hero} />
             <ScreenTitle
               title="SmartQuest"
               subtitle="Your English adventure across the universe."

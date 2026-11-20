@@ -1,5 +1,6 @@
 // Componentes del tema espacial (la app es un universo: unidades = galaxias,
 // lecciones = planetas).
+export { default as Astronaut } from './Astronaut';
 export { default as Avatar } from './Avatar';
 export { default as LightCard } from './LightCard';
 export { default as MessageBubble } from './MessageBubble';

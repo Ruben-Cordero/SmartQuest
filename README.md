@@ -179,7 +179,7 @@ src/
     ├── components/
     │   ├── ErrorState.jsx       # Mensaje de error + botón "Retry"
     │   ├── LoadingView.jsx      # Pantalla de carga completa
-    │   └── space/               # Tema espacial: SpaceBackground, Planet, SpaceCard, LightCard,
+    │   └── space/               # Tema espacial: SpaceBackground, Planet, Astronaut, SpaceCard, LightCard,
     │                            # SpaceButton, ScreenTitle, MessageBubble, ProgressBar y Avatar (index.js)
     ├── hooks/
     │   └── useAsyncResource.js  # Carga de datos con estados loading / success / error y retry()
@@ -209,7 +209,7 @@ La app es un universo: cada **unidad** es una **galaxia** y cada **lección** un
 - Fuentes: `fonts.display` / `fonts.heading` (Space Grotesk) para títulos, botones y pestañas; `fonts.body`, `fonts.bodyMedium` y `fonts.bodyBold` (Inter) para el texto de lectura (mínimo 16). Con fuentes personalizadas no uses `fontWeight`: usa la familia correspondiente.
 - Colores: fondo oscuro (`colors.background`), tarjetas (`colors.surface`), dorado (`colors.primary`) para estrellas y la acción principal, verde energía (`colors.energy`) para aciertos y progreso. `colors.danger` es **solo** para errores, respuestas incorrectas o salir.
 - El contenido de lectura de las lecciones va en una tarjeta **clara**: `LightCard` con texto `colors.onLessonCard`.
-- Usa los componentes de `src/shared/components/space` (`SpaceBackground`, `Planet`, `SpaceCard`, `LightCard`, `SpaceButton`, `ScreenTitle`, `MessageBubble`, `ProgressBar`, `Avatar`).
+- Usa los componentes de `src/shared/components/space` (`SpaceBackground`, `Planet`, `Astronaut`, `SpaceCard`, `LightCard`, `SpaceButton`, `ScreenTitle`, `MessageBubble`, `ProgressBar`, `Avatar`).
 - Animaciones con `react-native-reanimated` y respetando "reducir movimiento" (`useReducedMotion()` o `.reduceMotion(ReduceMotion.System)`).
 - Botones y planetas tocables de al menos 48 px y con `accessibilityLabel`.
 - XP, rachas, ranking y nivel del usuario **no se muestran**: la API todavía no los tiene (no se inventan).
