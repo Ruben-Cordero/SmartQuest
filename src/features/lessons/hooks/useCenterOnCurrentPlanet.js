@@ -3,7 +3,7 @@
 import { useCallback, useRef } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { computePathLayout } from '../../services/galaxy';
+import { computePathLayout } from '../services/galaxy';
 
 export function useCenterOnCurrentPlanet(galaxies, mapWidth) {
   const reduceMotion = useReducedMotion();

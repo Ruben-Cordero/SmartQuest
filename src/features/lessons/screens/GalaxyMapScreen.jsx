@@ -1,8 +1,8 @@
 // Dueño: Rubén. Mapa del universo: cada unidad es una galaxia y cada lección un
 // planeta. Datos: GET /contenidos/ingles (inglesApi.js); el estado de cada planeta
 // sale del campo "estado" que devuelve la API. Nada de datos locales.
-import { useNavigation } from '@react-navigation/native';
-import { useCallback, useMemo } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useCallback, useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 
 import { layout, spacing } from '../../../config/theme';
@@ -13,7 +13,7 @@ import { useAuth } from '../../auth';
 import GalaxyHeader from '../components/galaxy/GalaxyHeader';
 import GalaxySection from '../components/galaxy/GalaxySection';
 import MapSkeleton from '../components/galaxy/MapSkeleton';
-import { useCenterOnCurrentPlanet } from '../components/galaxy/useCenterOnCurrentPlanet';
+import { useCenterOnCurrentPlanet } from '../hooks/useCenterOnCurrentPlanet';
 import { ENGLISH_ROUTES } from '../navigation/routes';
 import { buildGalaxies } from '../services/galaxy';
 import { getContenidoIngles } from '../services/inglesApi';
@@ -25,8 +25,22 @@ export default function GalaxyMapScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const mapWidth = Math.min(windowWidth - spacing.md * 2, layout.maxContentWidth);
 
-  const { data: contenido, status, error, retry } = useAsyncResource(getContenidoIngles);
+  const { data: contenido, status, error, retry, refresh } = useAsyncResource(getContenidoIngles);
   const galaxies = useMemo(() => buildGalaxies(normalizeUnits(contenido)), [contenido]);
+
+  // Al volver al mapa (por ejemplo, tras marcar una lección como estudiada) se pide
+  // de nuevo el progreso a la API, en silencio, para desbloquear el siguiente planeta.
+  // La primera vez no hace falta: los datos se acaban de cargar al abrir la pantalla.
+  const primerFoco = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (primerFoco.current) {
+        primerFoco.current = false;
+        return;
+      }
+      refresh();
+    }, [refresh]),
+  );
   const { scrollRef, onViewportLayout, onSectionLayout, onPathLayout } = useCenterOnCurrentPlanet(
     galaxies,
     mapWidth,

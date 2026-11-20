@@ -178,6 +178,7 @@ src/
 └── shared/                      # Código común a varias funcionalidades
     ├── components/
     │   ├── ErrorState.jsx       # Mensaje de error + botón "Retry"
+    │   ├── LoadingState.jsx     # Indicador de carga con mensaje (dentro de una pantalla)
     │   ├── LoadingView.jsx      # Pantalla de carga completa
     │   └── space/               # Tema espacial: SpaceBackground, Planet, Astronaut, SpaceCard, LightCard,
     │                            # SpaceButton, ScreenTitle, MessageBubble, ProgressBar y Avatar (index.js)
@@ -193,7 +194,9 @@ src/
 
 - **Por funcionalidad:** cada pantalla vive en `src/features/<funcionalidad>/` junto a sus componentes y servicios. Desde fuera se importa solo lo que expone su `index.js` (por ejemplo, `import { useAuth } from '../features/auth'`).
 - **Capas:** las pantallas no llaman a `axios` ni a `fetch`; usan los servicios de su funcionalidad (`inglesApi.js`, `authService.js`), que usan `apiClient.js`. La lógica pura (cálculos, adaptar datos de la API) va en `services/` sin React, para poder probarla.
-- **Sin duplicar:** para cargar datos usa `useAsyncResource`; para errores, `ErrorState`; para el contenedor de pantalla, `screenContent`; para la UI, los componentes de `shared/components/space`.
+- **Pantallas delgadas:** una pantalla solo arma componentes. La lógica con estado va en `hooks/` y la API o los cálculos en `services/`. Los componentes de una pantalla se agrupan en una subcarpeta de `components/` (por ejemplo `components/lesson/`).
+- **Sin duplicar:** para cargar datos usa `useAsyncResource`; para carga y error, `LoadingState` y `ErrorState`; para el contenedor de pantalla, `screenContent`; para la UI, los componentes de `shared/components/space`.
+- **Sin valores sueltos:** colores, tamaños y espacios salen siempre de `src/config/theme.js` (los dibujos SVG pueden tener su propia paleta).
 - **`shared/`** solo contiene lo que usan dos o más funcionalidades.
 
 ### Idioma de la app
@@ -220,23 +223,30 @@ El módulo vive en `src/features/lessons/` (las guías antiguas dicen `src/modul
 
 ```text
 src/features/lessons/
+├── screens/                       # Pantallas: solo arman piezas (sin lógica de datos)
+│   ├── GalaxyMapScreen.jsx        # Rubén (T06–T08, T16) · mapa de galaxias y planetas
+│   ├── LessonDetailScreen.jsx     # Estrella (T09–T11) · detalle de la lección (route.params.lessonId)
+│   └── GlossaryScreen.jsx         # Liam (T14, T15, T20) · glosario (pestaña Glossary)
 ├── components/
-│   ├── galaxy/                  # Rubén · piezas del mapa: GalaxyHeader, GalaxySection, GalaxyCard, PlanetPath, SpaceShip,
-│   │                            #   BlackHole, MapSkeleton y useCenterOnCurrentPlanet
-│   ├── LessonExample.jsx        # Liam (T12) · ejemplo de una lección en una LightCard
-│   └── PronunciationButton.jsx  # Liam (T20) · pronunciación por voz (expo-speech)
+│   ├── galaxy/                    # Rubén · GalaxyHeader, GalaxySection, GalaxyCard, PlanetPath,
+│   │                              #   SpaceShip, BlackHole y MapSkeleton
+│   ├── lesson/                    # Estrella · LessonHeader, LessonSectionCard (teoría) y LessonAction
+│   ├── glossary/                  # Liam · TermCard y GlossarySearchBar
+│   ├── LessonExample.jsx          # Liam (T12) · ejemplos de la lección (lo usa LessonDetailScreen)
+│   └── PronunciationButton.jsx    # Liam (T20) · pronunciación por voz (expo-speech)
+├── hooks/                         # Lógica con estado de React
+│   ├── useCenterOnCurrentPlanet.js  # Rubén · centra el mapa en el planeta actual
+│   ├── useLesson.js               # Estrella · carga la lección (GET /lecciones/:id)
+│   ├── useMarkAsStudied.js        # Estrella · marca la lección como estudiada
+│   └── useGlossarySearch.js       # Liam · búsqueda con espera de 400 ms
+├── services/                      # API y lógica pura (sin React, se puede probar sola)
+│   ├── inglesApi.js               # Marvin (T03) · ÚNICO servicio de la API del módulo
+│   ├── lessons.js                 # Rubén · normalizeUnits(): adapta la respuesta de /contenidos
+│   └── galaxy.js                  # Rubén · buildGalaxies(), galaxyName() y geometría del camino
 ├── navigation/
-│   ├── EnglishNavigator.jsx     # Rubén · stack mapa de galaxias → detalle del planeta
-│   └── routes.js                # Rubén · nombres de rutas (ENGLISH_ROUTES)
-├── screens/
-│   ├── GalaxyMapScreen.jsx      # Rubén (T06, T07, T08, T16) · mapa de galaxias y planetas
-│   ├── LessonDetailScreen.jsx   # Estrella (T09–T11) · detalle de lección (recibe route.params.lessonId)
-│   └── GlossaryScreen.jsx       # Liam (T14, T15, T20) · glosario (pestaña Glossary)
-├── services/
-│   ├── inglesApi.js             # Marvin (T03) · ÚNICO servicio de la API del módulo
-│   ├── lessons.js               # Rubén · normalizeUnits(): adapta la respuesta de /contenidos
-│   └── galaxy.js                # Rubén · buildGalaxies() y geometría del camino del mapa
-└── index.js                     # Rubén · exporta EnglishNavigator, ENGLISH_ROUTES y GlossaryScreen
+│   ├── EnglishNavigator.jsx       # Rubén · stack mapa de galaxias → detalle del planeta
+│   └── routes.js                  # Rubén · nombres de rutas (ENGLISH_ROUTES)
+└── index.js                       # Rubén · exporta EnglishNavigator, ENGLISH_ROUTES, GalaxyMapScreen y GlossaryScreen
 ```
 
 La tab bar (`src/navigation/MainTabNavigator.jsx`, de Rubén) monta `EnglishNavigator` en la pestaña **Galaxy** y `GlossaryScreen` en la pestaña **Glossary**.

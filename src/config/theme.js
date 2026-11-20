@@ -55,8 +55,14 @@ export const colors = {
     cian: '#2FD6FF',
   },
 
+  // Tarjeta de contenido de lección con efecto vidrio (teoría).
+  lessonCardGradient: ['rgba(255, 255, 255, 0.98)', 'rgba(240, 245, 255, 0.85)'],
+  lessonCardBorder: 'rgba(255, 255, 255, 0.5)',
+  lessonCardDivider: 'rgba(0, 0, 0, 0.1)',
+
   // Derivados con transparencia.
   overlay: 'rgba(11, 16, 38, 0.6)',
+  surfaceTranslucent: 'rgba(0, 0, 0, 0.4)', // tarjetas oscuras sobre el fondo de estrellas
   textFaint: 'rgba(154, 163, 199, 0.45)', // líneas punteadas y decoración (no texto)
 };
 
