@@ -3,12 +3,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import ProfileScreen from '../app/screens/ProfileScreen';
-import TeacherHomeScreen from '../app/screens/TeacherHomeScreen';
 import { ROLES } from '../config/roles';
 import { colors, fonts, layout, spacing, typography } from '../config/theme';
+import { useAuth } from '../features/auth';
 import { ENGLISH_ROUTES, EnglishNavigator, GlossaryScreen } from '../features/lessons';
-import { useAuth } from '../shared/context/AuthContext';
+import { ProfileScreen } from '../features/profile';
+import { TeacherDashboardScreen } from '../features/teacher-dashboard';
 import { headerOptions } from './screenOptions';
 import { MAIN_TABS } from './tabRoutes';
 
@@ -65,7 +65,7 @@ export default function MainTabNavigator() {
         // Pestañas exclusivas del docente.
         <Tab.Screen
           name={MAIN_TABS.PANEL}
-          component={TeacherHomeScreen}
+          component={TeacherDashboardScreen}
           options={{
             title: 'Dashboard',
             tabBarIcon: tabIcon('stats-chart'),

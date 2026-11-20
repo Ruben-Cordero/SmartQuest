@@ -35,6 +35,8 @@ export const colors = {
   surfaceAlt: palette.superficie2,
   border: palette.borde,
   text: palette.texto,
+  onBackground: palette.texto, // texto sobre el fondo (16.7:1)
+  onSurface: palette.texto, // texto sobre tarjetas (14.6:1)
   textMuted: palette.textoSecundario,
   primary: palette.acento,
   onPrimary: palette.textoSobreAcento,

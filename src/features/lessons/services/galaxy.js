@@ -8,6 +8,19 @@ export const PLANET_STATE = {
   LOCKED: 'locked',
 };
 
+// "Unit 1: …", "Unidad 2 - …", "UNIT 3. …": prefijo de numeración que trae la API.
+const UNIT_PREFIX = /^\s*(unit|unidad)\s*\d+\s*[:.\-–—]\s*/i;
+
+/**
+ * Nombre de la galaxia sin el prefijo "Unit N:" / "Unidad N:", porque la tarjeta
+ * ya muestra "Galaxy N of M". Si al quitarlo no queda nada, devuelve el título original.
+ */
+export function galaxyName(title) {
+  const texto = String(title ?? '').trim();
+  const sinPrefijo = texto.replace(UNIT_PREFIX, '').trim();
+  return sinPrefijo || texto;
+}
+
 /**
  * Convierte las unidades normalizadas (normalizeUnits) en galaxias con planetas.
  * - completed: la API dice ESTUDIADO.
@@ -34,7 +47,7 @@ export function buildGalaxies(units) {
     return {
       id: unidad.id,
       number: gi + 1,
-      title: unidad.title,
+      title: galaxyName(unidad.title),
       planets,
       completed,
       total: planets.length,

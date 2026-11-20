@@ -1,8 +1,8 @@
 // Dueño: Liam (T12).
-// Hoy: muestra el texto del ejemplo en una LightCard; si viene vacío o null, no muestra nada.
-// Falta: el diseño final del ejemplo (por ejemplo, resaltar la estructura gramatical).
+// Muestra los ejemplos de una lección (una línea por ejemplo) en una LightCard con
+// una etiqueta; si el ejemplo viene vacío o null, no muestra nada.
 // Lo usa LessonDetailScreen (Estrella): <LessonExample ejemplo={leccion.ejemplo} />
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts, radius, spacing, typography } from '../../../config/theme';

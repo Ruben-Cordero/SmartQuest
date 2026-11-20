@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
 import { ROLES } from '../config/roles';
+import { useAuth } from '../features/auth';
 import LoadingView from '../shared/components/LoadingView';
-import { useAuth } from '../shared/context/AuthContext';
 import MainTabNavigator from './MainTabNavigator';
 
 const ROL_NO_RECONOCIDO = 'Unrecognized role';

@@ -1,8 +1,7 @@
 // Dueño: Liam (T14, T15 y T20).
-// Hoy: título y "Coming soon".
-// Falta: buscador y lista con buscarGlosario(q) de '../services/inglesApi' (palabra,
-// definición, pronunciación, tiempo verbal, audio y ejemplo), estados de carga, error
-// y vacío, y el botón de audio con PronunciationButton.
+// Glosario: buscador con espera (debounce) y lista de términos de buscarGlosario(q)
+// (palabra, definición, pronunciación, tiempo verbal, audio y ejemplo), con estados de
+// carga, error y vacío, y el botón de pronunciación por voz PronunciationButton.
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -28,7 +27,7 @@ import PronunciationButton, { detenerPronunciacion } from '../components/Pronunc
 import { buscarGlosario } from '../services/inglesApi';
 
 const ESPERA_BUSQUEDA_MS = 400;
-const SIN_COINCIDENCIAS = 'No se encontraron coincidencias';
+const SIN_COINCIDENCIAS = 'No matches found.';
 
 function TermCard({ termino }) {
   const { palabra, pronunciacion, tiempoVerbal, definicion, ejemplo, linkAudio } = termino;
@@ -75,39 +74,36 @@ export default function GlossaryScreen() {
 
   // T15: espera 400 ms desde la última letra antes de pedir a la API.
   // Con el campo vacío pide de inmediato el glosario completo.
-useEffect(() => {
-  const idBusqueda = ++ultimaPeticion.current;
-  const espera = busqueda ? ESPERA_BUSQUEDA_MS : 0;
+  useEffect(() => {
+    const idBusqueda = ++ultimaPeticion.current;
+    const espera = busqueda ? ESPERA_BUSQUEDA_MS : 0;
 
-  const temporizador = setTimeout(async () => {
-    setCargando(true);
-    setError(null);
+    const temporizador = setTimeout(async () => {
+      setCargando(true);
+      setError(null);
 
-    try {
-      const data = await buscarGlosario(busqueda);
+      try {
+        const data = await buscarGlosario(busqueda);
 
-      if (idBusqueda === ultimaPeticion.current) {
-        setTerminos(Array.isArray(data) ? data : []);
+        if (idBusqueda === ultimaPeticion.current) {
+          setTerminos(Array.isArray(data) ? data : []);
+        }
+      } catch (e) {
+        if (idBusqueda === ultimaPeticion.current) {
+          setError(e?.message || 'Could not load the glossary. Please try again.');
+        }
+      } finally {
+        if (idBusqueda === ultimaPeticion.current) {
+          setCargando(false);
+        }
       }
-    } catch (e) {
-      if (idBusqueda === ultimaPeticion.current) {
-        setError(
-          e?.message ||
-          'Could not load the glossary. Please try again.'
-        );
-      }
-    } finally {
-      if (idBusqueda === ultimaPeticion.current) {
-        setCargando(false);
-      }
-    }
-  }, espera);
+    }, espera);
 
-  return () => {
-    clearTimeout(temporizador);
-    ultimaPeticion.current += 1;
-  };
-}, [busqueda, reintentos]);
+    return () => {
+      clearTimeout(temporizador);
+      ultimaPeticion.current += 1;
+    };
+  }, [busqueda, reintentos]);
 
   // Al salir de la pestaña del glosario se detiene el audio que esté sonando.
   useFocusEffect(useCallback(() => () => detenerPronunciacion(), []));
@@ -133,7 +129,7 @@ useEffect(() => {
     contenidoVacio = (
       <View style={styles.estado}>
         <MessageBubble tone="error">{error}</MessageBubble>
-        <SpaceButton title="Try again" onPress={reintentar} style={styles.reintentar} />
+        <SpaceButton title="Retry" onPress={reintentar} style={styles.reintentar} />
       </View>
     );
   } else if (!cargando && terminos?.length === 0) {

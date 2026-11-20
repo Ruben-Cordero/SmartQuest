@@ -7,7 +7,7 @@ export const API_BASE_URL = 'https://backend-virtu.onrender.com/api';
 // GET /contenidos/{APP_SLUG} y GET /glosarios/{APP_SLUG}.
 export const APP_SLUG = 'ingles';
 
-// true: el login usa datos simulados (ver src/shared/services/authService.js).
+// true: el login usa datos simulados (ver src/features/auth/services/authService.mock.js).
 // false: el login llama a la API real en API_BASE_URL.
 export const USE_MOCK = false;
 

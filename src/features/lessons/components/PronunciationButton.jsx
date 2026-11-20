@@ -1,6 +1,7 @@
 // Pronunciación del glosario mediante texto a voz (TTS).
 // No requiere enlaces MP3: lee directamente el campo `palabra`.
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { setAudioModeAsync } from 'expo-audio';
 import * as Speech from 'expo-speech';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -11,6 +12,16 @@ const INACTIVO = { palabra: null, fase: 'inactivo' };
 let estadoActual = INACTIVO;
 let solicitudActual = 0;
 const oyentes = new Set();
+let audioPreparado = null;
+
+// En iPhone, sin esto la voz no suena si el teléfono está en modo silencio.
+// Se configura una sola vez; si falla, se intenta leer igual.
+function prepararAudio() {
+  if (!audioPreparado) {
+    audioPreparado = setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
+  }
+  return audioPreparado;
+}
 
 function cambiarEstado(nuevo) {
   estadoActual = nuevo;
@@ -29,7 +40,8 @@ function reproducir(palabra) {
   const solicitud = ++solicitudActual;
   cambiarEstado({ palabra, fase: 'cargando' });
 
-  Speech.stop()
+  prepararAudio()
+    .then(() => Speech.stop())
     .then(() => {
       if (solicitud !== solicitudActual) return;
       Speech.speak(palabra, {
@@ -83,7 +95,9 @@ export default function PronunciationButton({ palabra, style }) {
       <Pressable
         onPress={alTocar}
         accessibilityRole="button"
-        accessibilityLabel={ocupado ? `Stop pronunciation of ${texto}` : `Play pronunciation of ${texto}`}
+        accessibilityLabel={
+          ocupado ? `Stop pronunciation of ${texto}` : `Play pronunciation of ${texto}`
+        }
         accessibilityState={{ busy: fase === 'cargando' }}
         hitSlop={spacing.xs}
         style={({ pressed }) => [

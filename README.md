@@ -36,6 +36,7 @@ Tiene dos roles: **estudiante** y **docente**. El docente cuenta con un panel pa
 | Íconos | `@expo/vector-icons ^15.0.2` | Íconos de la barra inferior y de las pantallas (Ionicons). |
 | Fuentes | `expo-font ~58.0.12`, `@expo-google-fonts/space-grotesk` y `@expo-google-fonts/inter` | Space Grotesk (títulos) e Inter (texto). |
 | Splash | `expo-splash-screen ~58.0.14` | Mantiene el splash visible hasta que cargan las fuentes. |
+| Pronunciación | `expo-speech ~58.0.4` y `expo-audio ~58.0.12` | `expo-speech` lee en voz alta las palabras del glosario (texto a voz del teléfono); `expo-audio` configura el audio para que suene aunque el iPhone esté en modo silencio. |
 | Gráficos | `react-native-svg 15.16.0` | Fondo de estrellas y nebulosas, planetas y caminos del mapa. |
 | Animaciones | `react-native-reanimated 4.7.1` y `react-native-worklets` | Pulso del planeta actual, nave y esqueletos de carga, en el hilo de UI. Expo configura el plugin de babel solo. |
 | axios | `^1.21.0` | Centraliza las llamadas a la API. |
@@ -150,47 +151,50 @@ El punto de entrada es `index.js`, que carga `App.js`, y este renderiza `src/app
 
 ```text
 src/
-├── app/                         # Componente raíz y pantallas generales
+├── app/                         # Arranque de la app
 │   ├── App.jsx                  # Carga las fuentes con el splash visible y luego monta AppContent
-│   ├── AppContent.jsx           # AuthProvider + elige AuthNavigator o AppNavigator según la sesión
-│   ├── fonts.js                 # Archivos de fuente por familia (para useFonts)
-│   └── screens/
-│       ├── LoginScreen.jsx      # Inicio de sesión (con acceso rápido en modo mock)
-│       ├── TeacherHomeScreen.jsx # Panel del docente (pestaña "Panel")
-│       └── ProfileScreen.jsx    # Perfil del usuario y botón "Log out"
+│   ├── AppContent.jsx           # Proveedores globales: zona segura, sesión (AuthProvider) y navegación
+│   └── fonts.js                 # Archivos de fuente por familia (para useFonts)
 ├── config/                      # Configuración compartida
 │   ├── apiConfig.js             # URL de la API, APP_SLUG, USE_MOCK y timeout
 │   ├── roles.js                 # ROLES y ROL_LABELS
 │   └── theme.js                 # Tema espacial: paleta, fuentes, tipografía, espaciados y medidas
-├── navigation/                  # Navegadores de la app
-│   ├── AppNavigator.jsx         # Con sesión: valida el rol y monta MainTabNavigator
-│   ├── AuthNavigator.jsx        # Sin sesión: pantalla de login
+├── navigation/                  # Navegación global
+│   ├── RootNavigator.jsx        # Con sesión → AppNavigator; sin sesión → AuthNavigator
+│   ├── AppNavigator.jsx         # Valida el rol y monta MainTabNavigator
+│   ├── AuthNavigator.jsx        # Pantalla de login
 │   ├── MainTabNavigator.jsx     # Barra inferior. Estudiante: Galaxy · Glossary · Profile. Docente: Dashboard · Profile
 │   ├── tabRoutes.js             # Nombres de las pestañas (MAIN_TABS)
-│   └── screenOptions.js         # Estilo común del header
-├── features/                    # Funcionalidades de la app (cada una con screens/, components/ y services/)
-│   ├── lessons/                 # Unidades y lecciones de inglés
-│   │   ├── components/          # galaxy/ (piezas del mapa), LessonExample y PronunciationButton
-│   │   ├── navigation/          # EnglishNavigator (temas → lección) y routes.js
-│   │   ├── screens/             # GalaxyMapScreen, LessonDetailScreen y GlossaryScreen
-│   │   ├── services/            # inglesApi.js (API) y lessons.js (normalizeUnits)
-│   │   └── index.js             # Exporta EnglishNavigator, ENGLISH_ROUTES y GlossaryScreen
-│   ├── quiz/                    # Cuestionarios
-│   ├── vocabulary/              # Glosario: palabra, definición, pronunciación, tiempo verbal, audio y ejemplo
-│   ├── progress/                # Progreso del estudiante
-│   └── teacher-dashboard/       # Panel del docente
+│   ├── screenOptions.js         # Estilo común de las cabeceras
+│   └── navigationTheme.js       # Colores base de React Navigation
+├── features/                    # Una carpeta por funcionalidad; cada una expone lo público en su index.js
+│   ├── auth/                    # Sesión: AuthContext (useAuth), LoginScreen, authService (+ mock y mensajes)
+│   ├── profile/                 # ProfileScreen
+│   ├── teacher-dashboard/       # TeacherDashboardScreen (pestaña Dashboard)
+│   ├── lessons/                 # Módulo de Inglés: mapa de galaxias, lección, glosario (ver más abajo)
+│   ├── quiz/                    # Cuestionarios (reservado)
+│   ├── vocabulary/              # Vocabulario (reservado)
+│   └── progress/                # Progreso del estudiante (reservado)
 └── shared/                      # Código común a varias funcionalidades
-    ├── components/              # Componentes UI reutilizables
-    │   ├── Button.jsx           # Alias de SpaceButton (compatibilidad)
-    │   ├── LoadingView.jsx      # Pantalla de carga
+    ├── components/
+    │   ├── ErrorState.jsx       # Mensaje de error + botón "Retry"
+    │   ├── LoadingView.jsx      # Pantalla de carga completa
     │   └── space/               # Tema espacial: SpaceBackground, Planet, SpaceCard, LightCard,
     │                            # SpaceButton, ScreenTitle, MessageBubble, ProgressBar y Avatar (index.js)
-    ├── context/
-    │   └── AuthContext.jsx      # AuthProvider y useAuth(): usuario, token, rol, login, logout...
-    └── services/
-        ├── apiClient.js         # Cliente axios central
-        └── authService.js       # login, getMe y logout (mock o API real)
+    ├── hooks/
+    │   └── useAsyncResource.js  # Carga de datos con estados loading / success / error y retry()
+    ├── services/
+    │   └── apiClient.js         # Cliente axios central (token y mensajes de error)
+    └── styles/
+        └── layout.js            # screenContent: contenedor estándar de pantalla
 ```
+
+### Reglas de arquitectura
+
+- **Por funcionalidad:** cada pantalla vive en `src/features/<funcionalidad>/` junto a sus componentes y servicios. Desde fuera se importa solo lo que expone su `index.js` (por ejemplo, `import { useAuth } from '../features/auth'`).
+- **Capas:** las pantallas no llaman a `axios` ni a `fetch`; usan los servicios de su funcionalidad (`inglesApi.js`, `authService.js`), que usan `apiClient.js`. La lógica pura (cálculos, adaptar datos de la API) va en `services/` sin React, para poder probarla.
+- **Sin duplicar:** para cargar datos usa `useAsyncResource`; para errores, `ErrorState`; para el contenedor de pantalla, `screenContent`; para la UI, los componentes de `shared/components/space`.
+- **`shared/`** solo contiene lo que usan dos o más funcionalidades.
 
 ### Idioma de la app
 
@@ -217,9 +221,10 @@ El módulo vive en `src/features/lessons/` (las guías antiguas dicen `src/modul
 ```text
 src/features/lessons/
 ├── components/
-│   ├── galaxy/                  # Rubén · piezas del mapa: GalaxyHeader, GalaxyCard, PlanetPath, SpaceShip, BlackHole, MapSkeleton
+│   ├── galaxy/                  # Rubén · piezas del mapa: GalaxyHeader, GalaxySection, GalaxyCard, PlanetPath, SpaceShip,
+│   │                            #   BlackHole, MapSkeleton y useCenterOnCurrentPlanet
 │   ├── LessonExample.jsx        # Liam (T12) · ejemplo de una lección en una LightCard
-│   └── PronunciationButton.jsx  # Liam (T20) · botón de audio de pronunciación (pendiente)
+│   └── PronunciationButton.jsx  # Liam (T20) · pronunciación por voz (expo-speech)
 ├── navigation/
 │   ├── EnglishNavigator.jsx     # Rubén · stack mapa de galaxias → detalle del planeta
 │   └── routes.js                # Rubén · nombres de rutas (ENGLISH_ROUTES)

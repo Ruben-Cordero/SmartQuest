@@ -1,22 +1,24 @@
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
-import { colors, fonts, layout, spacing, typography } from '../../config/theme';
-import { ScreenTitle, SpaceBackground, SpaceCard } from '../../shared/components/space';
-import { useAuth } from '../../shared/context/AuthContext';
+import { colors, fonts, spacing, typography } from '../../../config/theme';
+import { ScreenTitle, SpaceBackground, SpaceCard } from '../../../shared/components/space';
+import { screenContent } from '../../../shared/styles/layout';
+import { useAuth } from '../../auth';
 
-export default function TeacherHomeScreen() {
+// Panel docente (pestaña Dashboard). Por ahora es un marcador: el seguimiento real
+// se implementa en esta misma funcionalidad.
+export default function TeacherDashboardScreen() {
   const { usuario } = useAuth();
   const nombre = usuario?.nombreCompleto || 'teacher';
 
   return (
     <SpaceBackground seed="dashboard">
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={screenContent}>
         <ScreenTitle
           title={`Hi, ${nombre}!`}
           subtitle="Check how your students are doing in English."
         />
 
-        {/* Placeholder: se implementa en src/features/teacher-dashboard */}
         <SpaceCard style={styles.card}>
           <Text style={styles.cardTitle}>Progress tracking</Text>
           <Text style={styles.text}>The progress of your classes will appear here soon.</Text>
@@ -27,13 +29,6 @@ export default function TeacherHomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
-    alignSelf: 'center',
-  },
   card: {
     marginTop: spacing.lg,
   },

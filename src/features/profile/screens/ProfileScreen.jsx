@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { ROL_LABELS, ROLES } from '../../config/roles';
-import { colors, fonts, layout, spacing, typography } from '../../config/theme';
+import { ROL_LABELS, ROLES } from '../../../config/roles';
+import { colors, fonts, spacing, typography } from '../../../config/theme';
 import {
   Avatar,
   ScreenTitle,
   SpaceBackground,
   SpaceButton,
   SpaceCard,
-} from '../../shared/components/space';
-import { useAuth } from '../../shared/context/AuthContext';
+} from '../../../shared/components/space';
+import { screenContent } from '../../../shared/styles/layout';
+import { useAuth } from '../../auth';
 
 const SIN_DATOS = 'No data';
 
@@ -35,7 +36,7 @@ export default function ProfileScreen() {
     setCerrando(true);
     try {
       await logout();
-      // Al cerrar sesión, App.jsx muestra el login y esta pantalla se desmonta.
+      // Al cerrar sesión, RootNavigator muestra el login y esta pantalla se desmonta.
     } catch {
       setCerrando(false);
     }
@@ -47,7 +48,7 @@ export default function ProfileScreen() {
 
   return (
     <SpaceBackground seed="profile">
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={screenContent}>
         <View style={styles.hero}>
           <Avatar name={usuario?.nombreCompleto} size={88} />
           <ScreenTitle
@@ -96,13 +97,6 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
-    alignSelf: 'center',
-  },
   hero: {
     alignItems: 'center',
     marginTop: spacing.md,

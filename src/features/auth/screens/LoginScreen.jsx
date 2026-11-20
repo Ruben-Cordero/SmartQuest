@@ -10,8 +10,8 @@ import {
   View,
 } from 'react-native';
 
-import { USE_MOCK } from '../../config/apiConfig';
-import { colors, fonts, layout, radius, spacing, typography } from '../../config/theme';
+import { USE_MOCK } from '../../../config/apiConfig';
+import { colors, fonts, layout, radius, spacing, typography } from '../../../config/theme';
 import {
   MessageBubble,
   Planet,
@@ -19,9 +19,9 @@ import {
   SpaceBackground,
   SpaceButton,
   SpaceCard,
-} from '../../shared/components/space';
-import { useAuth } from '../../shared/context/AuthContext';
-import { MOCK_ACCOUNTS } from '../../shared/services/authService';
+} from '../../../shared/components/space';
+import { useAuth } from '../context/AuthContext';
+import { MOCK_ACCOUNTS } from '../services/authService.mock';
 
 export default function LoginScreen() {
   const { login, aviso } = useAuth();
@@ -43,7 +43,7 @@ export default function LoginScreen() {
     setEnviando(true);
     try {
       await login(usuarioIngresado.trim(), passwordIngresada);
-      // Con login exitoso, App.jsx reemplaza esta pantalla por la app.
+      // Con login exitoso, RootNavigator reemplaza esta pantalla por la app.
     } catch (e) {
       setError(e?.message || 'Could not log in. Please try again.');
       setEnviando(false);
